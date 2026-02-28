@@ -1,0 +1,752 @@
+[
+    {
+        "kanji": "爱",
+        "pinyin": "ài",
+        "translation": "to love"
+    },
+    {
+        "kanji": "八",
+        "pinyin": "bā",
+        "translation": "eight"
+    },
+    {
+        "kanji": "爸爸",
+        "pinyin": "bà ba",
+        "translation": "(informal) father"
+    },
+    {
+        "kanji": "杯子",
+        "pinyin": "bēi zi",
+        "translation": "cup"
+    },
+    {
+        "kanji": "北京",
+        "pinyin": "Běi jīng",
+        "translation": "Beijing"
+    },
+    {
+        "kanji": "本",
+        "pinyin": "běn",
+        "translation": "roots or stems of plants"
+    },
+    {
+        "kanji": "不客气",
+        "pinyin": "bù kè qi",
+        "translation": "you're welcome"
+    },
+    {
+        "kanji": "不",
+        "pinyin": "bù",
+        "translation": "(negative prefix)"
+    },
+    {
+        "kanji": "菜",
+        "pinyin": "cài",
+        "translation": "dish (type of food)"
+    },
+    {
+        "kanji": "茶",
+        "pinyin": "chá",
+        "translation": "tea"
+    },
+    {
+        "kanji": "吃",
+        "pinyin": "chī",
+        "translation": "to eat"
+    },
+    {
+        "kanji": "出租车",
+        "pinyin": "chū zū chē",
+        "translation": "taxi"
+    },
+    {
+        "kanji": "打电话",
+        "pinyin": "dǎ diàn huà",
+        "translation": "to make a telephone call"
+    },
+    {
+        "kanji": "大",
+        "pinyin": "dà",
+        "translation": "big"
+    },
+    {
+        "kanji": "的",
+        "pinyin": "de",
+        "translation": "of"
+    },
+    {
+        "kanji": "点",
+        "pinyin": "diǎn",
+        "translation": "point"
+    },
+    {
+        "kanji": "电脑",
+        "pinyin": "diàn nǎo",
+        "translation": "computer"
+    },
+    {
+        "kanji": "电视",
+        "pinyin": "diàn shì",
+        "translation": "television"
+    },
+    {
+        "kanji": "电影",
+        "pinyin": "diàn yǐng",
+        "translation": "movie"
+    },
+    {
+        "kanji": "东西",
+        "pinyin": "dōng xi",
+        "translation": "thing"
+    },
+    {
+        "kanji": "都",
+        "pinyin": "dōu",
+        "translation": "all"
+    },
+    {
+        "kanji": "读",
+        "pinyin": "dú",
+        "translation": "to read"
+    },
+    {
+        "kanji": "对不起",
+        "pinyin": "duì bu qǐ",
+        "translation": "unworthy"
+    },
+    {
+        "kanji": "多",
+        "pinyin": "duō",
+        "translation": "many"
+    },
+    {
+        "kanji": "多少",
+        "pinyin": "duō shao",
+        "translation": "how much"
+    },
+    {
+        "kanji": "儿子",
+        "pinyin": "ér zi",
+        "translation": "son"
+    },
+    {
+        "kanji": "二",
+        "pinyin": "èr",
+        "translation": "two"
+    },
+    {
+        "kanji": "饭馆",
+        "pinyin": "fàn guǎn",
+        "translation": "restaurant"
+    },
+    {
+        "kanji": "飞机",
+        "pinyin": "fēi jī",
+        "translation": "airplane"
+    },
+    {
+        "kanji": "分钟",
+        "pinyin": "fēn zhōng",
+        "translation": "minute"
+    },
+    {
+        "kanji": "高兴",
+        "pinyin": "gāo xìng",
+        "translation": "happy"
+    },
+    {
+        "kanji": "个",
+        "pinyin": "gè",
+        "translation": "variant of 個|个[gè]"
+    },
+    {
+        "kanji": "工作",
+        "pinyin": "gōng zuò",
+        "translation": "to work"
+    },
+    {
+        "kanji": "狗",
+        "pinyin": "gǒu",
+        "translation": "dog"
+    },
+    {
+        "kanji": "汉语",
+        "pinyin": "Hàn yǔ",
+        "translation": "Chinese language"
+    },
+    {
+        "kanji": "好",
+        "pinyin": "hǎo",
+        "translation": "good"
+    },
+    {
+        "kanji": "喝",
+        "pinyin": "hē",
+        "translation": "to drink"
+    },
+    {
+        "kanji": "和",
+        "pinyin": "hé",
+        "translation": "and"
+    },
+    {
+        "kanji": "很",
+        "pinyin": "hěn",
+        "translation": "(adverb of degree)"
+    },
+    {
+        "kanji": "后面",
+        "pinyin": "hòu mian",
+        "translation": "rear"
+    },
+    {
+        "kanji": "回",
+        "pinyin": "huí",
+        "translation": "to curve"
+    },
+    {
+        "kanji": "会",
+        "pinyin": "huì",
+        "translation": "can"
+    },
+    {
+        "kanji": "火车站",
+        "pinyin": "huǒ chē zhàn",
+        "translation": "train station"
+    },
+    {
+        "kanji": "几",
+        "pinyin": "jǐ",
+        "translation": "how much"
+    },
+    {
+        "kanji": "家",
+        "pinyin": "jiā",
+        "translation": "home"
+    },
+    {
+        "kanji": "叫",
+        "pinyin": "jiào",
+        "translation": "to shout"
+    },
+    {
+        "kanji": "今天",
+        "pinyin": "jīn tiān",
+        "translation": "today"
+    },
+    {
+        "kanji": "九",
+        "pinyin": "jiǔ",
+        "translation": "nine"
+    },
+    {
+        "kanji": "开",
+        "pinyin": "kāi",
+        "translation": "to open"
+    },
+    {
+        "kanji": "看",
+        "pinyin": "kàn",
+        "translation": "to see"
+    },
+    {
+        "kanji": "看见",
+        "pinyin": "kàn jiàn",
+        "translation": "to see"
+    },
+    {
+        "kanji": "块",
+        "pinyin": "kuài",
+        "translation": "lump (of earth)"
+    },
+    {
+        "kanji": "来",
+        "pinyin": "lái",
+        "translation": "to come"
+    },
+    {
+        "kanji": "老师",
+        "pinyin": "lǎo shī",
+        "translation": "teacher"
+    },
+    {
+        "kanji": "了",
+        "pinyin": "le",
+        "translation": "(modal particle intensifying preceding clause)"
+    },
+    {
+        "kanji": "冷",
+        "pinyin": "lěng",
+        "translation": "cold"
+    },
+    {
+        "kanji": "里",
+        "pinyin": "lǐ",
+        "translation": "li (Chinese mile)"
+    },
+    {
+        "kanji": "零",
+        "pinyin": "líng",
+        "translation": "zero"
+    },
+    {
+        "kanji": "六",
+        "pinyin": "liù",
+        "translation": "six"
+    },
+    {
+        "kanji": "妈妈",
+        "pinyin": "mā ma",
+        "translation": "mama"
+    },
+    {
+        "kanji": "吗",
+        "pinyin": "ma",
+        "translation": "(question tag)"
+    },
+    {
+        "kanji": "买",
+        "pinyin": "mǎi",
+        "translation": "to buy"
+    },
+    {
+        "kanji": "猫",
+        "pinyin": "māo",
+        "translation": "cat"
+    },
+    {
+        "kanji": "没",
+        "pinyin": "méi",
+        "translation": "(negative prefix for verbs)"
+    },
+    {
+        "kanji": "没关系",
+        "pinyin": "méi guān xi",
+        "translation": "it doesn't matter"
+    },
+    {
+        "kanji": "米饭",
+        "pinyin": "mǐ fàn",
+        "translation": "(cooked) rice"
+    },
+    {
+        "kanji": "明天",
+        "pinyin": "míng tiān",
+        "translation": "tomorrow"
+    },
+    {
+        "kanji": "名字",
+        "pinyin": "míng zi",
+        "translation": "name (of a person or thing)"
+    },
+    {
+        "kanji": "哪",
+        "pinyin": "nǎ",
+        "translation": "how"
+    },
+    {
+        "kanji": "那",
+        "pinyin": "nà",
+        "translation": "that"
+    },
+    {
+        "kanji": "呢",
+        "pinyin": "ne",
+        "translation": "particle indicating that a previously asked question is to be applied to the preceding word (\"What about ...?\")"
+    },
+    {
+        "kanji": "能",
+        "pinyin": "néng",
+        "translation": "to be able to"
+    },
+    {
+        "kanji": "你",
+        "pinyin": "nǐ",
+        "translation": "you (informal)"
+    },
+    {
+        "kanji": "年",
+        "pinyin": "nián",
+        "translation": "year"
+    },
+    {
+        "kanji": "女儿",
+        "pinyin": "nǚ ér",
+        "translation": "daughter"
+    },
+    {
+        "kanji": "朋友",
+        "pinyin": "péng you",
+        "translation": "friend"
+    },
+    {
+        "kanji": "漂亮",
+        "pinyin": "piào liang",
+        "translation": "pretty"
+    },
+    {
+        "kanji": "苹果",
+        "pinyin": "píng guǒ",
+        "translation": "apple"
+    },
+    {
+        "kanji": "七",
+        "pinyin": "qī",
+        "translation": "seven"
+    },
+    {
+        "kanji": "钱",
+        "pinyin": "qián",
+        "translation": "coin"
+    },
+    {
+        "kanji": "前面",
+        "pinyin": "qián miàn",
+        "translation": "ahead"
+    },
+    {
+        "kanji": "请",
+        "pinyin": "qǐng",
+        "translation": "to ask"
+    },
+    {
+        "kanji": "去",
+        "pinyin": "qù",
+        "translation": "to go"
+    },
+    {
+        "kanji": "热",
+        "pinyin": "rè",
+        "translation": "to warm up"
+    },
+    {
+        "kanji": "人",
+        "pinyin": "rén",
+        "translation": "man"
+    },
+    {
+        "kanji": "认识",
+        "pinyin": "rèn shi",
+        "translation": "to know"
+    },
+    {
+        "kanji": "日",
+        "pinyin": "rì",
+        "translation": "sun"
+    },
+    {
+        "kanji": "三",
+        "pinyin": "sān",
+        "translation": "three"
+    },
+    {
+        "kanji": "商店",
+        "pinyin": "shāng diàn",
+        "translation": "store"
+    },
+    {
+        "kanji": "上",
+        "pinyin": "shàng",
+        "translation": "on top"
+    },
+    {
+        "kanji": "上午",
+        "pinyin": "shàng wǔ",
+        "translation": "morning"
+    },
+    {
+        "kanji": "少",
+        "pinyin": "shǎo",
+        "translation": "few"
+    },
+    {
+        "kanji": "谁",
+        "pinyin": "shéi",
+        "translation": "who"
+    },
+    {
+        "kanji": "什么",
+        "pinyin": "shén me",
+        "translation": "what?"
+    },
+    {
+        "kanji": "十",
+        "pinyin": "shí",
+        "translation": "ten"
+    },
+    {
+        "kanji": "时候",
+        "pinyin": "shí hou",
+        "translation": "time"
+    },
+    {
+        "kanji": "是",
+        "pinyin": "shì",
+        "translation": "is"
+    },
+    {
+        "kanji": "书",
+        "pinyin": "shū",
+        "translation": "book"
+    },
+    {
+        "kanji": "水",
+        "pinyin": "shuǐ",
+        "translation": "water"
+    },
+    {
+        "kanji": "水果",
+        "pinyin": "shuǐ guǒ",
+        "translation": "fruit"
+    },
+    {
+        "kanji": "睡觉",
+        "pinyin": "shuì jiào",
+        "translation": "to go to bed"
+    },
+    {
+        "kanji": "说话",
+        "pinyin": "shuō huà",
+        "translation": "to speak"
+    },
+    {
+        "kanji": "四",
+        "pinyin": "sì",
+        "translation": "four"
+    },
+    {
+        "kanji": "岁",
+        "pinyin": "suì",
+        "translation": "classifier for years (of age)"
+    },
+    {
+        "kanji": "他",
+        "pinyin": "tā",
+        "translation": "he or him"
+    },
+    {
+        "kanji": "她",
+        "pinyin": "tā",
+        "translation": "she"
+    },
+    {
+        "kanji": "太",
+        "pinyin": "tài",
+        "translation": "highest"
+    },
+    {
+        "kanji": "天气",
+        "pinyin": "tiān qì",
+        "translation": "weather"
+    },
+    {
+        "kanji": "听",
+        "pinyin": "tīng",
+        "translation": "to listen"
+    },
+    {
+        "kanji": "同学",
+        "pinyin": "tóng xué",
+        "translation": "to study at the same school"
+    },
+    {
+        "kanji": "喂",
+        "pinyin": "wèi",
+        "translation": "to feed"
+    },
+    {
+        "kanji": "我",
+        "pinyin": "wǒ",
+        "translation": "I"
+    },
+    {
+        "kanji": "我们",
+        "pinyin": "wǒ men",
+        "translation": "we"
+    },
+    {
+        "kanji": "五",
+        "pinyin": "wǔ",
+        "translation": "five"
+    },
+    {
+        "kanji": "喜欢",
+        "pinyin": "xǐ huan",
+        "translation": "to like"
+    },
+    {
+        "kanji": "下",
+        "pinyin": "xià",
+        "translation": "down"
+    },
+    {
+        "kanji": "下午",
+        "pinyin": "xià wǔ",
+        "translation": "afternoon"
+    },
+    {
+        "kanji": "下雨",
+        "pinyin": "xià yǔ",
+        "translation": "to rain"
+    },
+    {
+        "kanji": "先生",
+        "pinyin": "xiān sheng",
+        "translation": "teacher"
+    },
+    {
+        "kanji": "现在",
+        "pinyin": "xiàn zài",
+        "translation": "now"
+    },
+    {
+        "kanji": "想",
+        "pinyin": "xiǎng",
+        "translation": "to think"
+    },
+    {
+        "kanji": "小",
+        "pinyin": "xiǎo",
+        "translation": "small"
+    },
+    {
+        "kanji": "小姐",
+        "pinyin": "xiǎo jie",
+        "translation": "young lady"
+    },
+    {
+        "kanji": "些",
+        "pinyin": "xiē",
+        "translation": "some"
+    },
+    {
+        "kanji": "写",
+        "pinyin": "xiě",
+        "translation": "to write"
+    },
+    {
+        "kanji": "谢谢",
+        "pinyin": "xiè xie",
+        "translation": "to thank"
+    },
+    {
+        "kanji": "星期",
+        "pinyin": "xīng qī",
+        "translation": "week"
+    },
+    {
+        "kanji": "学生",
+        "pinyin": "xué sheng",
+        "translation": "student"
+    },
+    {
+        "kanji": "学习",
+        "pinyin": "xué xí",
+        "translation": "to learn"
+    },
+    {
+        "kanji": "学校",
+        "pinyin": "xué xiào",
+        "translation": "school"
+    },
+    {
+        "kanji": "一",
+        "pinyin": "yī",
+        "translation": "one"
+    },
+    {
+        "kanji": "衣服",
+        "pinyin": "yī fu",
+        "translation": "clothes"
+    },
+    {
+        "kanji": "医生",
+        "pinyin": "yī shēng",
+        "translation": "doctor"
+    },
+    {
+        "kanji": "医院",
+        "pinyin": "yī yuàn",
+        "translation": "hospital"
+    },
+    {
+        "kanji": "椅子",
+        "pinyin": "yǐ zi",
+        "translation": "chair"
+    },
+    {
+        "kanji": "有",
+        "pinyin": "yǒu",
+        "translation": "to have"
+    },
+    {
+        "kanji": "月",
+        "pinyin": "yuè",
+        "translation": "moon"
+    },
+    {
+        "kanji": "在",
+        "pinyin": "zài",
+        "translation": "(located) at"
+    },
+    {
+        "kanji": "再见",
+        "pinyin": "zài jiàn",
+        "translation": "goodbye"
+    },
+    {
+        "kanji": "怎么",
+        "pinyin": "zěn me",
+        "translation": "variant of 怎麼|怎么[zěn me]"
+    },
+    {
+        "kanji": "怎么样",
+        "pinyin": "zěn me yàng",
+        "translation": "how?"
+    },
+    {
+        "kanji": "这",
+        "pinyin": "zhè",
+        "translation": "this"
+    },
+    {
+        "kanji": "中国",
+        "pinyin": "Zhōng guó",
+        "translation": "China"
+    },
+    {
+        "kanji": "中午",
+        "pinyin": "zhōng wǔ",
+        "translation": "noon"
+    },
+    {
+        "kanji": "住",
+        "pinyin": "zhù",
+        "translation": "to live"
+    },
+    {
+        "kanji": "桌子",
+        "pinyin": "zhuō zi",
+        "translation": "table"
+    },
+    {
+        "kanji": "字",
+        "pinyin": "zì",
+        "translation": "letter"
+    },
+    {
+        "kanji": "昨天",
+        "pinyin": "zuó tiān",
+        "translation": "yesterday"
+    },
+    {
+        "kanji": "坐",
+        "pinyin": "zuò",
+        "translation": "to sit"
+    },
+    {
+        "kanji": "做",
+        "pinyin": "zuò",
+        "translation": "to do"
+    }
+]

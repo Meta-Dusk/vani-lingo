@@ -1,0 +1,43 @@
+[project]
+name = "VaniLingo"
+version = "0.1.0"
+description = "A Simple App for Learning Chinese"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [{ name = "MetaDusk", email = "andredcxxv@gmail.com" }]
+license = { text = "AGPL-3.0" }
+
+dependencies = [
+    "cerebras-cloud-sdk>=1.67.0",
+    "edge-tts>=7.2.7",
+    "flet>=0.81.0",
+    "flet-audio>=0.81.0",
+    "python-dotenv>=1.2.1",
+]
+
+[dependency-groups]
+dev = ["flet-cli>=0.81.0", "flet-desktop>=0.81.0", "flet-web>=0.81.0"]
+
+[tool.flet]
+org = "com.metadusk"
+product = "VaniLingo"
+company = "MetaDusk Inc."
+copyright = "Copyright (C) 2025 MetaDusk"
+build_number = 1
+
+[tool.flet.app]
+path = "src"
+
+[tool.flet.android.permission]
+"android.permission.INTERNET" = true
+"android.permission.ACCESS_NETWORK_STATE" = true
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
