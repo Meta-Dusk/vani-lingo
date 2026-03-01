@@ -17,7 +17,7 @@ def setup_page(page: ft.Page) -> None:
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.fonts = FONT_STYLES
     page.theme_mode = ft.ThemeMode.DARK
-    page.theme = ft.Theme(color_scheme_seed=ft.Colors.RED_900)
+    page.theme = ft.Theme(color_scheme_seed=ft.Colors.RED_900, font_family=FontStyles.NOTO_SANS_SC)
     if page.platform == ft.PagePlatform.WINDOWS:
         page.window.width = 450
         page.window.height = 700
