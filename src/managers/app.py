@@ -42,24 +42,33 @@ class MainApp:
         print(f"Generated HSK-{hsk_type}: {entry_len} {entry_text}.")
     
     def load_hsk_data(self, file_name: str = "hsk1.json") -> list[HSKWordDict]:
-        # Build the path to the asset correctly for Android
-        base_dir = os.path.dirname(__file__)
-        json_path = os.path.join(base_dir, "assets", "hsk_data", file_name)
+        # Gather all potential base directories for assets
+        potential_dirs = [
+            # The official Flet variable (often absolute on mobile)
+            os.getenv("FLET_ASSETS_DIR"),
+            # Relative to the script (PC dev)
+            os.path.join(os.path.dirname(__file__), "assets"),
+            # Standard relative path
+            "assets"
+        ]
         
-        # Fallback: Flet sometimes sets a specific environment variable for assets
-        if not os.path.exists(json_path):
-            flet_assets = os.getenv("FLET_ASSETS_DIR", "assets")
-            json_path = os.path.join(base_dir, flet_assets, "hsk_data", file_name)
-        
-        try:
-            with open(json_path, "r", encoding="utf-8") as f:
-                self.hsk_data = json.load(f)
+        # Filter out None values and look for the file
+        for directory in filter(None, potential_dirs):
+            json_path = os.path.join(directory, "hsk_data", file_name)
             
-        except FileNotFoundError:
-            # Fallback in case the file is missing during a build
-            print(f"Data not found in: '{json_path}'")
-            self.hsk_data = self._word_error_data
-            
+            if os.path.exists(json_path):
+                try:
+                    with open(json_path, "r", encoding="utf-8") as f:
+                        self.hsk_data = json.load(f)
+                        print(f"Successfully loaded data from: {json_path}")
+                        return self.hsk_data
+                except Exception as e:
+                    print(f"Error reading {json_path}: {e}")
+                    continue
+                
+        # Final Fallback if all paths fail
+        print("CRITICAL: HSK data file not found in any expected locations.")
+        self.hsk_data = self._word_error_data
         return self.hsk_data
     
     def get_random_word(self) -> HSKWordDict:
