@@ -1,7 +1,7 @@
 import flet as ft
 import asyncio
 
-from setup import setup_page, FontStyles, PC_PLATFORMS
+from setup import setup_page, PC_PLATFORMS
 from audio.audio_manager import AudioManager
 from managers.tts import TextToSpeech
 from managers.auth import ClientAuth
