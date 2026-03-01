@@ -1,6 +1,6 @@
 [project]
 name = "VaniLingo"
-version = "0.1.2"
+version = "0.2.0"
 description = "A Simple App for Learning Chinese"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -29,7 +29,7 @@ build_number = 1
 path = "src"
 
 [tool.flet.android]
-include_assets = ["assets/hsk_data"]
+include_assets = ["assets"]
 
 [tool.flet.android.permission]
 "android.permission.INTERNET" = true

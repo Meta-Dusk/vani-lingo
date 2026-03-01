@@ -28,7 +28,15 @@ class KPTDisplay(ft.Container):
             pinyin=ft.Text(value=self.pinyin, size=24, italic=True, color=ft.Colors.PRIMARY),
             translation=ft.Text(value=self.translation, size=16, color=ft.Colors.SECONDARY)
         )
-        self.listen_button = ft.IconButton(ft.Icons.VOLUME_UP, on_click=self.on_listen)
+        self.listen_button = ft.IconButton(
+            icon=ft.Icons.VOLUME_UP, on_click=self.on_listen,
+            style=ft.ButtonStyle(
+                color={
+                    ft.ControlState.DEFAULT: ft.Colors.TERTIARY,
+                    ft.ControlState.DISABLED: ft.Colors.with_opacity(0.38, ft.Colors.ON_SURFACE)
+                }
+            )
+        )
         self.content = ft.Column(
             controls=[
                 ft.Row(
@@ -50,3 +58,32 @@ class KPTDisplay(ft.Container):
         if title: dps.title.value = title
         try: self.update()
         except RuntimeError: pass
+
+@ft.control
+class StatusText(ft.Column):
+    alignment: ft.MainAxisAlignment = ft.MainAxisAlignment.CENTER
+    horizontal_alignment: ft.CrossAxisAlignment = ft.CrossAxisAlignment.CENTER
+    text: str = ""
+    tight: bool = True
+    visible: bool = False
+    
+    def build(self):
+        self.text_control = ft.Text(self.text, color=ft.Colors.SECONDARY)
+        self.loader = ft.ProgressRing(color=ft.Colors.SECONDARY)
+        self.controls = [self.text_control, self.loader]
+    
+    def try_update(self):
+        try:
+            self.update()
+            self.text_control.update()
+        except RuntimeError: pass
+    
+    def set_text(self, text: str) -> None:
+        self.text_control.value = text
+        self.visible = True
+        self.try_update()
+    
+    def clear_text(self) -> None:
+        self.text_control.value = ""
+        self.visible = False
+        self.try_update()
