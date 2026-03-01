@@ -27,7 +27,8 @@ def main(page: ft.Page) -> None:
             e.control.update()
         
         print(f"Generating TTS audio for: \"{e.data}\"")
-        audio_manager.play_sfx(await TextToSpeech(e.data).get_audio_bytes())
+        audio_bytes, _ = await TextToSpeech(e.data).get_audio_and_timing()
+        audio_manager.play_sfx(audio_bytes)
         print("Playing TTS audio sample!")
     
     page.add(

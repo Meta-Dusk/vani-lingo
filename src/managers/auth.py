@@ -5,6 +5,8 @@ from typing import Optional
 from cerebras.cloud.sdk import AsyncCerebras
 
 from components.inputs import KeyField
+from components.displays import StatusText
+from utilities.file_management import load_json_file
 
 class ClientAuth:
     def __init__(
@@ -20,10 +22,10 @@ class ClientAuth:
     
     def _debug_print(self, msg: str) -> None:
         if not self.debug: return
-        print(f"[ClientAuth] {msg}")
+        print(f"[ClientAuth]: {msg}")
     
     def get_client(self) -> Optional[AsyncCerebras]:
-        if self.offline_mode:
+        if self.offline_mode or self.api_key is None:
             self._debug_print("Client is in offline mode!")
             return None
         client = AsyncCerebras(api_key=self.api_key)
@@ -41,24 +43,11 @@ class ClientAuth:
             self.api_key = key
             return key
         
-        try:
-            # Build the path relative to THIS file (main.py)
-            base_dir = os.path.dirname(__file__)
-            secret_path = os.path.join(base_dir, "assets", "secret.json")
-            
-            # Fallback: Flet sometimes sets a specific environment variable for assets
-            if not os.path.exists(secret_path):
-                flet_assets = os.getenv("FLET_ASSETS_DIR", "assets")
-                secret_path = os.path.join(base_dir, flet_assets, "secret.json")
-                
-            with open(secret_path, "r", encoding="utf-8") as f:
-                secret = json.load(f)
-                key = secret.get("CEREBRAS_API_KEY")
-                self.api_key = key
-                return key
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            self._debug_print(f"Asset lookup failed: {e}")
-            pass
+        key = load_json_file("secret.json")
+        if key:
+            key: dict[str, str]
+            self.api_key = key.get("CEREBRAS_API_KEY")
+            return key
         
         load_dotenv()
         key = os.getenv("CEREBRAS_API_KEY")
@@ -93,11 +82,13 @@ class ClientAuth:
         validated_event = asyncio.Event()
         validated_key: Optional[str] = None
         
-        async def validate(_) -> None:
+        async def on_validate(_) -> None:
             nonlocal validated_key
             kf.reset_error()
+            status_txt.set_text("Validating...")
             
             if kf.value in [None, "", " "]:
+                status_txt.clear_text()
                 kf.set_error("Key Cannot be Empty")
                 return
             
@@ -107,24 +98,34 @@ class ClientAuth:
                 await self.prefs.set("cerebras_api_key", kf.value)
                 self.page.pop_dialog()
                 validated_event.set()
+                status_txt.set_text("Validated Key!")
             else:
+                status_txt.clear_text()
                 kf.set_error("Invalid Key")
         
-        def on_cancel(_) -> None:
+        def on_offline_mode(_) -> None:
             nonlocal validated_key
             self._debug_print("Entering offline mode!")
+            status_txt.set_text("Entering offline mode...")
             validated_key = None
+            self.page.pop_dialog()
+            self.offline_mode = True
             validated_event.set()
         
-        kf = KeyField(on_click=validate)
+        kf = KeyField(on_click=on_validate)
+        status_txt = StatusText()
         
         modal_dialog = ft.AlertDialog(
             modal=True,
             title="Authentication Required",
-            content=kf,
+            content=ft.Column(
+                controls=[kf, status_txt],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                tight=True
+            ),
             actions=[
-                ft.Button("Validate", on_click=validate),
-                ft.Button("Enter Offline Mode", on_click=on_cancel)
+                ft.Button("Validate", on_click=on_validate),
+                ft.Button("Enter Offline Mode", on_click=on_offline_mode)
             ],
         )
         

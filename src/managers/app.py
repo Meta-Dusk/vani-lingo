@@ -3,6 +3,8 @@ from cerebras.cloud.sdk import AsyncCerebras
 from typing import Optional, TypedDict
 from dataclasses import dataclass
 
+from utilities.file_management import load_json_file
+
 class HSKWordDict(TypedDict):
     kanji: str
     pinyin: str
@@ -34,40 +36,24 @@ class MainApp:
             {"kanji": "水", "pinyin": "shuǐ", "translation": "water"}
         ]
     
+    def _debug_print(self, msg: str) -> None:
+        print(f"[App]: {msg}")
+    
     async def initialize(self, hsk_type: int = 1):
         """Loads data and prepares the app."""
         await asyncio.to_thread(self.load_hsk_data, f"hsk{hsk_type}.json")
         entry_len = len(self.hsk_data)
         entry_text = f"{"entries" if entry_len > 1 else "entry"}"
-        print(f"Generated HSK-{hsk_type}: {entry_len} {entry_text}.")
+        self._debug_print(f"Generated HSK-{hsk_type}: {entry_len} {entry_text}.")
     
     def load_hsk_data(self, file_name: str = "hsk1.json") -> list[HSKWordDict]:
-        # Gather all potential base directories for assets
-        potential_dirs = [
-            # The official Flet variable (often absolute on mobile)
-            os.getenv("FLET_ASSETS_DIR"),
-            # Relative to the script (PC dev)
-            os.path.join(os.path.dirname(__file__), "assets"),
-            # Standard relative path
-            "assets"
-        ]
+        hsk_data = load_json_file(os.path.join("hsk_data", file_name))
+        if hsk_data:
+            self.hsk_data = hsk_data
+            return self.hsk_data
         
-        # Filter out None values and look for the file
-        for directory in filter(None, potential_dirs):
-            json_path = os.path.join(directory, "hsk_data", file_name)
-            
-            if os.path.exists(json_path):
-                try:
-                    with open(json_path, "r", encoding="utf-8") as f:
-                        self.hsk_data = json.load(f)
-                        print(f"Successfully loaded data from: {json_path}")
-                        return self.hsk_data
-                except Exception as e:
-                    print(f"Error reading {json_path}: {e}")
-                    continue
-                
         # Final Fallback if all paths fail
-        print("CRITICAL: HSK data file not found in any expected locations.")
+        self._debug_print("CRITICAL: HSK data file not found in any expected locations.")
         self.hsk_data = self._word_error_data
         return self.hsk_data
     
@@ -104,10 +90,10 @@ class MainApp:
                 response_format={"type": "json_object"}
             )
             content_raw = response.choices[0].message.content
-            print(f"\nReceived: {json.dumps(json.loads(content_raw), ensure_ascii=False, indent=2)}\n")
+            self._debug_print(f"\nReceived: {json.dumps(json.loads(content_raw), ensure_ascii=False, indent=2)}")
             
             content: ExampleDataDict = json.loads(content_raw.encode("utf-8").decode("utf-8"))
-            print(f"Generated: {content}\n")
+            self._debug_print(f"Generated: {json.dumps(content, ensure_ascii=False, indent=2)}\n")
             
             return LessonDataclass(**base_word, **content)
         
