@@ -28,7 +28,7 @@ class ClientAuth:
         if self.offline_mode or self.api_key is None:
             self._debug_print("Client is in offline mode!")
             return None
-        client = AsyncCerebras(api_key=self.api_key)
+        client = AsyncCerebras(api_key=self.api_key, timeout=20.0)
         self.client = client
         return client
     
@@ -87,7 +87,7 @@ class ClientAuth:
             kf.reset_error()
             status_txt.set_text("Validating...")
             
-            if kf.value in [None, "", " "]:
+            if not kf.value or not kf.value.strip() or kf.value.isspace():
                 status_txt.clear_text()
                 kf.set_error("Key Cannot be Empty")
                 return

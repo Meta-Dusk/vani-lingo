@@ -1,5 +1,5 @@
 import flet as ft
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 @dataclass
@@ -16,18 +16,12 @@ class KPTDisplay(ft.Container):
     pinyin: str = ""
     translation: str = ""
     on_listen: Optional[ft.ControlEventHandler[ft.IconButton]] = None
+    padding: Optional[ft.PaddingValue] = 16
+    border: Optional[ft.Border] = field(default_factory=lambda: ft.Border.all(2, ft.Colors.ON_PRIMARY_CONTAINER))
+    border_radius: Optional[ft.BorderRadiusValue] = 16
+    bgcolor: Optional[ft.ColorValue] = ft.Colors.PRIMARY_CONTAINER
     
-    def build(self):
-        self.padding = 16
-        self.border = ft.Border.all(2, ft.Colors.ON_PRIMARY_CONTAINER)
-        self.border_radius = 16
-        self.bgcolor = ft.Colors.PRIMARY_CONTAINER
-        self.text_displays = TextDisplays(
-            title=ft.Text(value=self.title, size=24, color=ft.Colors.TERTIARY),
-            kanji=ft.Text(value=self.kanji, size=32, weight=ft.FontWeight.BOLD, color=ft.Colors.PRIMARY),
-            pinyin=ft.Text(value=self.pinyin, size=24, italic=True, color=ft.Colors.PRIMARY),
-            translation=ft.Text(value=self.translation, size=16, color=ft.Colors.SECONDARY)
-        )
+    def init(self):
         self.listen_button = ft.IconButton(
             icon=ft.Icons.VOLUME_UP, on_click=self.on_listen,
             style=ft.ButtonStyle(
@@ -37,6 +31,14 @@ class KPTDisplay(ft.Container):
                 }
             )
         )
+        self.text_displays = TextDisplays(
+            title=ft.Text(value=self.title, size=24, color=ft.Colors.TERTIARY),
+            kanji=ft.Text(value=self.kanji, size=32, weight=ft.FontWeight.BOLD, color=ft.Colors.PRIMARY),
+            pinyin=ft.Text(value=self.pinyin, size=24, italic=True, color=ft.Colors.PRIMARY),
+            translation=ft.Text(value=self.translation, size=16, color=ft.Colors.SECONDARY)
+        )
+    
+    def build(self):
         self.content = ft.Column(
             controls=[
                 ft.Row(

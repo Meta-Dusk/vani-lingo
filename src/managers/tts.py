@@ -1,4 +1,4 @@
-import edge_tts, re
+import edge_tts
 from typing import Literal, Optional
 
 class TextToSpeech(edge_tts.Communicate):

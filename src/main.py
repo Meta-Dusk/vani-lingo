@@ -6,10 +6,11 @@ from setup import setup_page, PC_PLATFORMS
 from audio.audio_manager import AudioManager
 from managers.tts import TextToSpeech
 from managers.auth import ClientAuth
-from managers.app import MainApp
+from managers.lesson import LessonManager
 from components.buttons import ToggleThemeButton
 from components.displays import KPTDisplay
 from components.popups import LoadingNotification
+from utilities.testers import is_connected
 
 # TODO: Clean up
 async def main(page: ft.Page) -> None:
@@ -19,9 +20,12 @@ async def main(page: ft.Page) -> None:
     if page.platform in PC_PLATFORMS:
         await page.window.center()
     
+    def debug_print(text: str) -> None:
+        print(f"[Main]: {text}")
+    
     def change_status(text: str) -> None:
         nonlocal status_txt
-        print(f"[Main]: {text}")
+        debug_print(text)
         status_txt.value = text
         status_txt.update()
     
@@ -44,30 +48,38 @@ async def main(page: ft.Page) -> None:
         change_status("Awaiting API key...")
         await auth.api_check()
     
+    change_status("Checking internet connection...")
+    if not is_connected():
+        auth.offline_mode = True
+    
     change_status("Starting client...")
     client = auth.get_client()
-    app = MainApp(client)
+    lesson_manager = LessonManager(client)
     if client is None:
         change_status("Entering offline mode...")
     
     change_status("Initializing Data...")
-    await app.initialize()
+    await lesson_manager.initialize()
     
     # Callbacks
     def toggle_block() -> None:
-        controls = [
+        wifi_req_btns = [
             word_kpt_display.listen_button,
-            example_kpt_display.listen_button,
-            button_row
+            example_kpt_display.listen_button
         ]
-        for control in controls:
-            control: ft.Control
-            control.disabled = block_actions
-            control.update()
+        for btn in wifi_req_btns:
+            btn: ft.IconButton
+            if auth.offline_mode: break
+            btn.disabled = block_actions
+            btn.update()
+        button_row.disabled = block_actions
+        button_row.update()
     
     async def play_word(_) -> None:
         nonlocal block_actions
-        if word_audio_bytes is None or len(word_audio_cues) == 0: return
+        if word_audio_bytes is None or len(word_audio_cues) == 0:
+            debug_print("Nothing to play")
+            return
         block_actions = True
         toggle_block()
         await play_with_highlight(
@@ -80,7 +92,9 @@ async def main(page: ft.Page) -> None:
     
     async def play_example(_) -> None:
         nonlocal block_actions
-        if example_audio_bytes is None or len(example_audio_cues) == 0: return
+        if example_audio_bytes is None or len(example_audio_cues) == 0:
+            debug_print("Nothing to play")
+            return
         block_actions = True
         toggle_block()
         await play_with_highlight(
@@ -91,21 +105,42 @@ async def main(page: ft.Page) -> None:
         block_actions = False
         toggle_block()
     
+    async def get_word_tts(text: str) -> None:
+        nonlocal word_audio_bytes, word_audio_cues
+        if auth.offline_mode:
+            debug_print("Can't generate TTS when in offline mode!")
+            return
+        try:
+            tts = TextToSpeech(text)
+            word_audio_bytes, word_audio_cues = await tts.get_audio_and_timing()
+        except Exception as e:
+            debug_print(f"TTS Initialization failed: {e}")
+    
+    async def get_example_tts(text: str) -> None:
+        nonlocal example_audio_bytes, example_audio_cues
+        if auth.offline_mode:
+            debug_print("Can't generate TTS when in offline mode!")
+            return
+        try:
+            tts = TextToSpeech(text)
+            example_audio_bytes, example_audio_cues = await tts.get_audio_and_timing()
+        except Exception as e:
+            debug_print(f"TTS Initialization failed: {e}")
+    
     async def generate_word(_) -> None:
-        nonlocal word_audio_bytes, word_audio_cues, block_actions
+        nonlocal block_actions
         page.show_dialog(LoadingNotification(text="Retrieving a new random word..."))
         block_actions = True
         toggle_block()
         
-        data = app.get_random_word()
+        data = lesson_manager.get_random_word()
         word_kpt_display.set_text(**data, title="Word")
         example_kpt_display.visible = False
         example_kpt_display.update()
         
-        word_to_speak = data.get("kanji").strip()
-        word_audio_bytes, word_audio_cues = await TextToSpeech(word_to_speak).get_audio_and_timing()
+        await get_word_tts(data.get("kanji").strip())
         
-        if word_audio_bytes:
+        if word_audio_bytes and not auth.offline_mode:
             audio_manager.play_sfx(word_audio_bytes)
         
         page.pop_dialog()
@@ -114,28 +149,25 @@ async def main(page: ft.Page) -> None:
         await play_word(_)
     
     async def generate_lesson(_) -> None:
-        nonlocal word_audio_bytes, word_audio_cues, example_audio_bytes, example_audio_cues, block_actions
+        nonlocal block_actions
         page.show_dialog(LoadingNotification(text="Retrieving a new random word and example..."))
         block_actions = True
         toggle_block()
         
-        data = await app.get_lesson_data()
+        data = await lesson_manager.get_lesson_data()
         
-        if data.error is None:
+        if data.error is None and not auth.offline_mode:
             word_kpt_display.set_text(data.kanji, data.pinyin, data.translation, title="Word")
             example_kpt_display.visible = True
             example_kpt_display.set_text(data.example, data.example_pinyin, data.example_en)
             
-            word_to_speak = data.kanji.strip()
-            word_audio_bytes, word_audio_cues = await TextToSpeech(word_to_speak).get_audio_and_timing()
-            
-            example_to_speak = data.example.strip()
-            example_audio_bytes, example_audio_cues = await TextToSpeech(example_to_speak).get_audio_and_timing()
+            await get_word_tts(data.kanji.strip())
+            await get_example_tts(data.example.strip())
             
             if example_audio_bytes:
                 audio_manager.play_sfx(example_audio_bytes)
         else:
-            print(f"Cerebras Error: {data.error}")
+            debug_print(f"Cerebras Error: {data.error}")
         
         page.pop_dialog()
         block_actions = False
@@ -149,7 +181,7 @@ async def main(page: ft.Page) -> None:
         else:
             msg = "Failed resetting saved preferences!"
         page.pop_dialog()
-        print(msg)
+        debug_print(msg)
         page.show_dialog(ft.SnackBar(msg, ft.SnackBarBehavior.FLOATING))
     
     def prepare_highlight_text(text_control: ft.Text, cues: list[Subtitle]):
@@ -195,11 +227,15 @@ async def main(page: ft.Page) -> None:
         on_listen=play_word
     )
     example_kpt_display = KPTDisplay(title="Example", visible=False, on_listen=play_example)
+    word_kpt_display.listen_button.disabled = auth.offline_mode
+    example_kpt_display.listen_button.disabled = auth.offline_mode
     
     change_status("Finishing Setup... 2/2")
-    word_audio_bytes, word_audio_cues = await TextToSpeech(word_kpt_display.kanji).get_audio_and_timing()
+    word_audio_bytes: bytes = None
+    word_audio_cues: list[Subtitle] = []
     example_audio_bytes: bytes = None
     example_audio_cues: list[Subtitle] = []
+    await get_word_tts(word_kpt_display.kanji)
     
     # Layouts
     button_row = ft.Row(
@@ -246,12 +282,14 @@ async def main(page: ft.Page) -> None:
             ToggleThemeButton(),
             ft.PopupMenuButton(
                 items=[
-                    ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=on_reset)
+                    ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=on_reset),
+                    ft.PopupMenuItem("Personalization", ft.Icons.PERSON)
                 ],
                 tooltip="Show additional actions",
                 icon=ft.Icons.SETTINGS
             )
-        ]
+        ],
+        tooltip="Additional settings"
     )
     page.update()
     await play_word(None)

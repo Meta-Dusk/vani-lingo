@@ -25,7 +25,7 @@ class LessonDataclass:
     example_en: Optional[str] = None
     error: Optional[str] = None
 
-class MainApp:
+class LessonManager:
     def __init__(self, client: Optional[AsyncCerebras]) -> None:
         self.client = client
         self.hsk_data: list[HSKWordDict] = []
@@ -37,7 +37,7 @@ class MainApp:
         ]
     
     def _debug_print(self, msg: str) -> None:
-        print(f"[App]: {msg}")
+        print(f"[LessonManager]: {msg}")
     
     async def initialize(self, hsk_type: int = 1):
         """Loads data and prepares the app."""
