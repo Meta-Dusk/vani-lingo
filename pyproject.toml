@@ -1,6 +1,6 @@
 [project]
 name = "VaniLingo"
-version = "0.2.2"
+version = "0.2.3"
 description = "A Simple App for Learning Chinese"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -27,6 +27,14 @@ build_number = 1
 
 [tool.flet.app]
 path = "src"
+
+[tool.flet.app.boot_screen]
+show = true
+message = "Booting up VaniLingo..."
+
+[tool.flet.app.startup_screen]
+show = true
+message = "Starting VaniLingo..."
 
 [tool.flet.android]
 include_assets = ["assets"]

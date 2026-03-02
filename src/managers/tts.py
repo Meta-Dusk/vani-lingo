@@ -1,5 +1,12 @@
 import edge_tts
+from edge_tts.srt_composer import Subtitle
 from typing import Literal, Optional
+from dataclasses import dataclass, field
+
+@dataclass
+class TTSData:
+    audio: bytes = None
+    cues: list[Subtitle] = field(default_factory=list)
 
 class TextToSpeech(edge_tts.Communicate):
     """A simple class for producing TTS audio samples."""
@@ -15,12 +22,15 @@ class TextToSpeech(edge_tts.Communicate):
             receive_timeout=receive_timeout
         )
         self.text = text
-        
-    async def get_audio_and_timing(self):
+    
+    def _debug_print(self, msg: str) -> None:
+        print(f"[TextToSpeech] {msg}")
+    
+    async def get_audio_and_timing(self) -> TTSData:
         """Returns audio bytes and a list of `Subtitle` objects."""
         audio_data = bytearray()
         submaker = edge_tts.SubMaker()
-        
+        self._debug_print(f"Attempting to make TTSData for: {self.text}")
         current_pos = 0
         
         async for chunk in self.stream():
@@ -54,8 +64,4 @@ class TextToSpeech(edge_tts.Communicate):
                 # This records exactly when each word starts and ends
                 submaker.feed(chunk)
                 
-        return bytes(audio_data), submaker.cues
-    
-    async def __call__(self):
-        """Calls `.get_audio_bytes()`"""
-        return await self.get_audio_and_timing()
+        return TTSData(bytes(audio_data), submaker.cues)

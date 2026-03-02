@@ -1,16 +1,18 @@
 import flet as ft
 import asyncio
-
 from edge_tts.srt_composer import Subtitle
+
 from setup import setup_page, PC_PLATFORMS
 from audio.audio_manager import AudioManager
-from managers.tts import TextToSpeech
+from managers.tts import TextToSpeech, TTSData
 from managers.auth import ClientAuth
 from managers.lesson import LessonManager
 from components.buttons import ToggleThemeButton
 from components.displays import KPTDisplay
 from components.popups import LoadingNotification
 from utilities.testers import is_connected
+from utilities.values import is_vani_bday
+
 
 # TODO: Clean up
 async def main(page: ft.Page) -> None:
@@ -63,73 +65,71 @@ async def main(page: ft.Page) -> None:
     
     # Callbacks
     def toggle_block() -> None:
-        wifi_req_btns = [
+        wifi_req_btns: list[ft.IconButton] = [
             word_kpt_display.listen_button,
             example_kpt_display.listen_button
         ]
-        other_controls = [
+        other_controls: list[ft.Control] = [
             button_row,
             seg_btn
         ]
         for btn in wifi_req_btns:
-            btn: ft.IconButton
             if auth.offline_mode: break
             btn.disabled = block_actions
             btn.update()
         for control in other_controls:
-            control: ft.Control
             control.disabled = block_actions
             control.update()
     
     async def play_word(_) -> None:
         nonlocal block_actions
-        if word_audio_bytes is None or len(word_audio_cues) == 0:
+        if word_tts_data.audio is None or len(word_tts_data.cues) == 0:
             debug_print("Nothing to play")
             return
         block_actions = True
         toggle_block()
         await play_with_highlight(
             text_control=word_kpt_display.text_displays.kanji,
-            audio_bytes=word_audio_bytes,
-            cues=word_audio_cues
+            audio_bytes=word_tts_data.audio,
+            cues=word_tts_data.cues
         )
         block_actions = False
         toggle_block()
     
     async def play_example(_) -> None:
         nonlocal block_actions
-        if example_audio_bytes is None or len(example_audio_cues) == 0:
+        if example_tts_data.audio is None or len(example_tts_data.cues) == 0:
             debug_print("Nothing to play")
             return
         block_actions = True
         toggle_block()
         await play_with_highlight(
             text_control=example_kpt_display.text_displays.kanji,
-            audio_bytes=example_audio_bytes,
-            cues=example_audio_cues
+            audio_bytes=example_tts_data.audio,
+            cues=example_tts_data.cues
         )
         block_actions = False
         toggle_block()
     
     async def get_word_tts(text: str) -> None:
-        nonlocal word_audio_bytes, word_audio_cues
+        nonlocal word_tts_data
         if auth.offline_mode:
             debug_print("Can't generate TTS when in offline mode!")
             return
         try:
             tts = TextToSpeech(text)
-            word_audio_bytes, word_audio_cues = await tts.get_audio_and_timing()
+            word_tts_data = await tts.get_audio_and_timing()
         except Exception as e:
             debug_print(f"TTS Initialization failed: {e}")
     
     async def get_example_tts(text: str) -> None:
-        nonlocal example_audio_bytes, example_audio_cues
+        nonlocal example_tts_data
         if auth.offline_mode:
             debug_print("Can't generate TTS when in offline mode!")
             return
         try:
             tts = TextToSpeech(text)
-            example_audio_bytes, example_audio_cues = await tts.get_audio_and_timing()
+            example_tts_data = await tts.get_audio_and_timing()
         except Exception as e:
             debug_print(f"TTS Initialization failed: {e}")
     
@@ -146,8 +146,8 @@ async def main(page: ft.Page) -> None:
         
         await get_word_tts(data.get("kanji").strip())
         
-        if word_audio_bytes and not auth.offline_mode:
-            audio_manager.play_sfx(word_audio_bytes)
+        if word_tts_data.audio and not auth.offline_mode:
+            audio_manager.play_sfx(word_tts_data.audio)
         
         page.pop_dialog()
         block_actions = False
@@ -170,8 +170,8 @@ async def main(page: ft.Page) -> None:
             await get_word_tts(data.kanji.strip())
             await get_example_tts(data.example.strip())
             
-            if example_audio_bytes:
-                audio_manager.play_sfx(example_audio_bytes)
+            if example_tts_data.audio:
+                audio_manager.play_sfx(example_tts_data.audio)
             page.pop_dialog()
         else:
             debug_print(f"Cerebras Error: {data.error}")
@@ -214,14 +214,13 @@ async def main(page: ft.Page) -> None:
         for i, cue in enumerate(cues):
             # Calculate how long to wait before highlighting this word
             wait_time = (cue.start.total_seconds()) - (asyncio.get_event_loop().time() - start_time)
-            if wait_time > 0:
-                await asyncio.sleep(wait_time)
+            if wait_time > 0: await asyncio.sleep(wait_time)
                 
             # Update the UI to highlight the current word
             text_control.spans[i].style.color = ft.Colors.INVERSE_PRIMARY
             text_control.spans[i].style.weight = ft.FontWeight.BOLD
             
-            if i > 0:
+            if i > 0: # Color finished words differently
                 text_control.spans[i-1].style.color = ft.Colors.OUTLINE
                 text_control.spans[i-1].style.weight = ft.FontWeight.NORMAL
                 
@@ -234,27 +233,27 @@ async def main(page: ft.Page) -> None:
     
     def on_personalization(_) -> None:        
         async def on_save(_) -> None:
-            text = tf.value
-            text.strip().lower()
+            text = tf.value.strip().lower()
             if not text or text.isspace():
                 tf.error = "Cannot be empty"
-                tf.update()
             else:
                 tf.error = None
-                tf.update()
+            tf.update()
             debug_print(f"Saving name: {text}")
-            await prefs.set("user_name", text)
+            if await prefs.set("user_name", text):
+                msg = f"Saved \"{text}\" as the 'user_name'!"
+            else:
+                msg = f"Failed to save \"{text}\" as the 'user_name'..."
             page.pop_dialog()
+            page.show_dialog(ft.SnackBar(msg, ft.SnackBarBehavior.FLOATING))
+            await check_bday(update_tts_data=True, play_tts=True)
         
         tf = ft.TextField(
-            autofocus=True, max_lines=1,
-            max_length=30, on_submit=on_save
+            autofocus=True, max_lines=1, max_length=30, on_submit=on_save
         )
         dialog = ft.AlertDialog(
             title="Enter a Name", content=tf,
-            actions=[
-                ft.Button("Save", ft.Icons.SAVE, on_click=on_save)
-            ]
+            actions=[ft.Button("Save", ft.Icons.SAVE, on_click=on_save)]
         )
         page.show_dialog(dialog)
     
@@ -263,6 +262,41 @@ async def main(page: ft.Page) -> None:
         data: int = int(data_list[0])
         debug_print(f"Setting hsk level to: {data}")
         lesson_manager.current_hsk_level = data
+    
+    async def check_bday(
+        *, update_tts_data: bool = False, play_tts: bool = False
+    ) -> None:
+        nonlocal settings_menu_btn, greet_btn
+        name: str = await prefs.get("user_name")
+        if not is_vani_bday() or not name.strip().lower() == "vani": return
+        word_kpt_display.set_text(
+            kanji="生日快乐, Vani!",
+            pinyin="Shēngrì kuàilè, Vani!",
+            translation="Happy birthday, Vani!",
+            title="Hello Vani"
+        )
+        greet_btn.visible = True
+        try: greet_btn.update()
+        except RuntimeError: pass
+        if update_tts_data: await get_word_tts(word_kpt_display.kanji)
+        if play_tts: await play_word(None)
+    
+    def open_greeting(e: ft.Event[ft.IconButton]) -> None:
+        nonlocal settings_menu_btn
+        dialog = ft.AlertDialog(
+            title="Happy Birthday, Vani!",
+            content=ft.Image("images/bday_cake.png", fit=ft.BoxFit.CONTAIN),
+            actions=[
+                ft.Button(
+                    "Thank you", icon=ft.Icons.FACE_3_ROUNDED,
+                    on_click=lambda _: page.pop_dialog()
+                )
+            ]
+        )
+        e.control.badge = None
+        try: e.control.update()
+        except RuntimeError: pass
+        page.show_dialog(dialog)
     
     # UI Components
     word_kpt_display = KPTDisplay(
@@ -284,11 +318,23 @@ async def main(page: ft.Page) -> None:
         on_change=seg_btn_on_change
     )
     
+    greet_btn = ft.IconButton(
+        ft.Icons.NOTIFICATION_IMPORTANT, visible=False,
+        on_click=open_greeting, badge=ft.Badge(small_size=10)
+    )
+    settings_menu_btn = ft.PopupMenuButton(
+        tooltip="Show additional actions",
+        icon=ft.Icons.SETTINGS,
+        items=[
+            ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=on_reset),
+            ft.PopupMenuItem("Personalization", ft.Icons.PERSON, on_click=on_personalization)
+        ]
+    )
+    
     change_status("Finishing Setup... 2/2")
-    word_audio_bytes: bytes = None
-    word_audio_cues: list[Subtitle] = []
-    example_audio_bytes: bytes = None
-    example_audio_cues: list[Subtitle] = []
+    await check_bday()
+    word_tts_data = TTSData()
+    example_tts_data = TTSData()
     await get_word_tts(word_kpt_display.kanji)
     
     # Layouts
@@ -332,19 +378,7 @@ async def main(page: ft.Page) -> None:
     page.add(ft.SafeArea(main_content))
     page.appbar = ft.AppBar(
         leading=ft.Icon(ft.Icons.WIFI_OFF if auth.offline_mode else ft.Icons.WIFI, size=22),
-        title="VaniLingo",
-        actions=[
-            ToggleThemeButton(),
-            ft.PopupMenuButton(
-                items=[
-                    ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=on_reset),
-                    ft.PopupMenuItem("Personalization", ft.Icons.PERSON, on_click=on_personalization)
-                ],
-                tooltip="Show additional actions",
-                icon=ft.Icons.SETTINGS
-            )
-        ],
-        tooltip="Additional settings"
+        title="VaniLingo", actions=[ToggleThemeButton(), settings_menu_btn, greet_btn]
     )
     page.update()
     await play_word(None)
