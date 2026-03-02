@@ -18,7 +18,8 @@ def main(page: ft.Page) -> None:
     
     async def on_submit(e: ft.Event[ft.TextField]) -> None:
         nonlocal current_tts_bytes
-        if e.data in [None, "", " "]:
+        str_input: str = e.data
+        if not str_input or not str_input.strip() or str_input.isspace():
             e.control.error = "Cannot be empty"
             e.control.update()
             return
