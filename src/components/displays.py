@@ -53,11 +53,15 @@ class KPTDisplay(ft.Container):
         )
     
     def set_text(self, kanji: str, pinyin: str, translation: str, title: str = None) -> None:
-        dps = self.text_displays
-        dps.kanji.value = kanji
-        dps.pinyin.value = pinyin
-        dps.translation.value = translation
-        if title: dps.title.value = title
+        self.kanji = kanji
+        self.pinyin = pinyin
+        self.translation = translation
+        self.text_displays.kanji.value = kanji
+        self.text_displays.pinyin.value = pinyin
+        self.text_displays.translation.value = translation
+        if title:
+            self.title = title
+            self.text_displays.title.value = title
         try: self.update()
         except RuntimeError: pass
 
