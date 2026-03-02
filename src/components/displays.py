@@ -69,9 +69,11 @@ class StatusText(ft.Column):
     tight: bool = True
     visible: bool = False
     
-    def build(self):
+    def init(self):
         self.text_control = ft.Text(self.text, color=ft.Colors.SECONDARY)
         self.loader = ft.ProgressRing(color=ft.Colors.SECONDARY)
+    
+    def build(self):
         self.controls = [self.text_control, self.loader]
     
     def try_update(self):

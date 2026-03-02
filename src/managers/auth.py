@@ -1,5 +1,5 @@
 import flet as ft
-import os, json, asyncio
+import os, asyncio
 from dotenv import load_dotenv
 from typing import Optional
 from cerebras.cloud.sdk import AsyncCerebras
@@ -12,7 +12,7 @@ class ClientAuth:
     def __init__(
         self, page: ft.Page, prefs: ft.SharedPreferences,
         *, debug: bool = False, offline_mode: bool = False
-    ):
+    ) -> None:
         self.page = page
         self.prefs = prefs
         self.debug = debug
@@ -33,28 +33,35 @@ class ClientAuth:
         return client
     
     def get_api_key(self) -> Optional[str]:
+        """Searches for the API key in three possible locations."""
         if self.offline_mode:
             self._debug_print("Client is in offline mode!")
             return None
         
-        self._debug_print("Getting API key...")
+        self._debug_print("Getting API key... 1/3 (Checking local env)")
         key = os.getenv("CEREBRAS_API_KEY")
         if key:
             self.api_key = key
             return key
         
+        self._debug_print("Getting API key... 1/3 (Checking local files)")
         key = load_json_file("secret.json")
         if key:
             key: dict[str, str]
             self.api_key = key.get("CEREBRAS_API_KEY")
             return key
         
+        self._debug_print("Getting API key... 1/3 (Loading envs)")
         load_dotenv()
         key = os.getenv("CEREBRAS_API_KEY")
         self.api_key = key
         return key
     
     async def is_api_key_valid(self, client: AsyncCerebras) -> bool:
+        """
+        Checks if provided API key is valid by sending a small
+        API request to the server.
+        """
         if self.offline_mode:
             self._debug_print("Client is in offline mode!")
             return False
@@ -74,6 +81,7 @@ class ClientAuth:
             return False
         
     async def api_check(self) -> Optional[str]:
+        """Prompts the user for the API key."""
         if self.offline_mode:
             self._debug_print("Client is in offline mode!")
             return None
