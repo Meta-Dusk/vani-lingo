@@ -157,7 +157,7 @@
     {
         "kanji": "个",
         "pinyin": "gè",
-        "translation": "variant of 個|个[gè]"
+        "translation": "individual [variant of 個]"
     },
     {
         "kanji": "工作",
@@ -282,7 +282,7 @@
     {
         "kanji": "里",
         "pinyin": "lǐ",
-        "translation": "li (Chinese mile)"
+        "translation": "(Chinese mile)"
     },
     {
         "kanji": "零",
@@ -352,7 +352,7 @@
     {
         "kanji": "呢",
         "pinyin": "ne",
-        "translation": "particle indicating that a previously asked question is to be applied to the preceding word (\"What about ...?\")"
+        "translation": "(sentence-final particle) used in questions to link back to prior discourse or context"
     },
     {
         "kanji": "能",
@@ -697,12 +697,12 @@
     {
         "kanji": "怎么",
         "pinyin": "zěn me",
-        "translation": "variant of 怎麼|怎么[zěn me]"
+        "translation": "how? / what? / why? [variant of 怎麼]"
     },
     {
         "kanji": "怎么样",
         "pinyin": "zěn me yàng",
-        "translation": "how?"
+        "translation": "how? / how about? / how was it?"
     },
     {
         "kanji": "这",

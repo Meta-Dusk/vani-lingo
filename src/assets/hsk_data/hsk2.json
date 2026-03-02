@@ -1,0 +1,752 @@
+[
+    {
+        "kanji": "吧",
+        "pinyin": "ba",
+        "translation": "(modal particle indicating suggestion or surmise)"
+    },
+    {
+        "kanji": "白",
+        "pinyin": "bái",
+        "translation": "white"
+    },
+    {
+        "kanji": "百",
+        "pinyin": "bǎi",
+        "translation": "hundred"
+    },
+    {
+        "kanji": "帮助",
+        "pinyin": "bāng zhù",
+        "translation": "assistance"
+    },
+    {
+        "kanji": "报纸",
+        "pinyin": "bào zhǐ",
+        "translation": "newspaper"
+    },
+    {
+        "kanji": "比",
+        "pinyin": "bǐ",
+        "translation": "(particle used for comparison and \"-er than\")"
+    },
+    {
+        "kanji": "别",
+        "pinyin": "bié",
+        "translation": "to leave"
+    },
+    {
+        "kanji": "长",
+        "pinyin": "cháng",
+        "translation": "length"
+    },
+    {
+        "kanji": "唱歌",
+        "pinyin": "chàng gē",
+        "translation": "to sing a song"
+    },
+    {
+        "kanji": "出",
+        "pinyin": "chū",
+        "translation": "to go out"
+    },
+    {
+        "kanji": "穿",
+        "pinyin": "chuān",
+        "translation": "to bore through"
+    },
+    {
+        "kanji": "船",
+        "pinyin": "chuán",
+        "translation": "a boat"
+    },
+    {
+        "kanji": "次",
+        "pinyin": "cì",
+        "translation": "next in sequence"
+    },
+    {
+        "kanji": "从",
+        "pinyin": "cóng",
+        "translation": "from"
+    },
+    {
+        "kanji": "错",
+        "pinyin": "cuò",
+        "translation": "mistake"
+    },
+    {
+        "kanji": "打篮球",
+        "pinyin": "dá lán qiú",
+        "translation": "Play basketball"
+    },
+    {
+        "kanji": "大家",
+        "pinyin": "dà jiā",
+        "translation": "everyone"
+    },
+    {
+        "kanji": "但是",
+        "pinyin": "dàn shì",
+        "translation": "but"
+    },
+    {
+        "kanji": "到",
+        "pinyin": "dào",
+        "translation": "to (a place)"
+    },
+    {
+        "kanji": "得",
+        "pinyin": "de",
+        "translation": "structural particle: used after a verb (or adjective as main verb)"
+    },
+    {
+        "kanji": "得",
+        "pinyin": "děi",
+        "translation": "to have to"
+    },
+    {
+        "kanji": "弟弟",
+        "pinyin": "dì di",
+        "translation": "younger brother"
+    },
+    {
+        "kanji": "第一",
+        "pinyin": "dì yī",
+        "translation": "first"
+    },
+    {
+        "kanji": "懂",
+        "pinyin": "dǒng",
+        "translation": "to understand"
+    },
+    {
+        "kanji": "房间",
+        "pinyin": "fáng jiān",
+        "translation": "room"
+    },
+    {
+        "kanji": "非常",
+        "pinyin": "fēi cháng",
+        "translation": "unusual"
+    },
+    {
+        "kanji": "服务员",
+        "pinyin": "fú wù yuán",
+        "translation": "waiter"
+    },
+    {
+        "kanji": "高",
+        "pinyin": "gāo",
+        "translation": "high"
+    },
+    {
+        "kanji": "告诉",
+        "pinyin": "gào su",
+        "translation": "to tell"
+    },
+    {
+        "kanji": "哥哥",
+        "pinyin": "gē ge",
+        "translation": "older brother"
+    },
+    {
+        "kanji": "给",
+        "pinyin": "gěi",
+        "translation": "to"
+    },
+    {
+        "kanji": "公共汽车",
+        "pinyin": "gōng gòng qì chē",
+        "translation": "bus"
+    },
+    {
+        "kanji": "公斤",
+        "pinyin": "gōng jīn",
+        "translation": "kilogram (kg)"
+    },
+    {
+        "kanji": "公司",
+        "pinyin": "gōng sī",
+        "translation": "(business) company"
+    },
+    {
+        "kanji": "贵",
+        "pinyin": "guì",
+        "translation": "expensive"
+    },
+    {
+        "kanji": "还",
+        "pinyin": "hái",
+        "translation": "still"
+    },
+    {
+        "kanji": "孩子",
+        "pinyin": "hái zi",
+        "translation": "child"
+    },
+    {
+        "kanji": "好吃",
+        "pinyin": "hǎo chī",
+        "translation": "tasty"
+    },
+    {
+        "kanji": "号",
+        "pinyin": "hào",
+        "translation": "ordinal number"
+    },
+    {
+        "kanji": "黑",
+        "pinyin": "hēi",
+        "translation": "black"
+    },
+    {
+        "kanji": "红",
+        "pinyin": "hóng",
+        "translation": "red"
+    },
+    {
+        "kanji": "欢迎",
+        "pinyin": "huān yíng",
+        "translation": "to welcome"
+    },
+    {
+        "kanji": "还",
+        "pinyin": "huán",
+        "translation": "to pay back"
+    },
+    {
+        "kanji": "回答",
+        "pinyin": "huí dá",
+        "translation": "to reply"
+    },
+    {
+        "kanji": "机场",
+        "pinyin": "jī chǎng",
+        "translation": "airport"
+    },
+    {
+        "kanji": "鸡蛋",
+        "pinyin": "jī dàn",
+        "translation": "(chicken) egg"
+    },
+    {
+        "kanji": "件",
+        "pinyin": "jiàn",
+        "translation": "item"
+    },
+    {
+        "kanji": "教室",
+        "pinyin": "jiào shì",
+        "translation": "classroom"
+    },
+    {
+        "kanji": "姐姐",
+        "pinyin": "jiě jie",
+        "translation": "older sister"
+    },
+    {
+        "kanji": "介绍",
+        "pinyin": "jiè shào",
+        "translation": "to introduce (sb to sb)"
+    },
+    {
+        "kanji": "进",
+        "pinyin": "jìn",
+        "translation": "to advance"
+    },
+    {
+        "kanji": "近",
+        "pinyin": "jìn",
+        "translation": "near"
+    },
+    {
+        "kanji": "就",
+        "pinyin": "jiù",
+        "translation": "at once"
+    },
+    {
+        "kanji": "觉得",
+        "pinyin": "jué de",
+        "translation": "to think"
+    },
+    {
+        "kanji": "咖啡",
+        "pinyin": "kā fēi",
+        "translation": "coffee"
+    },
+    {
+        "kanji": "开始",
+        "pinyin": "kāi shǐ",
+        "translation": "to begin"
+    },
+    {
+        "kanji": "考试",
+        "pinyin": "kǎo shì",
+        "translation": "to take an exam"
+    },
+    {
+        "kanji": "可能",
+        "pinyin": "kě néng",
+        "translation": "might (happen)"
+    },
+    {
+        "kanji": "可以",
+        "pinyin": "kě yǐ",
+        "translation": "can"
+    },
+    {
+        "kanji": "课",
+        "pinyin": "kè",
+        "translation": "subject"
+    },
+    {
+        "kanji": "快",
+        "pinyin": "kuài",
+        "translation": "rapid"
+    },
+    {
+        "kanji": "快乐",
+        "pinyin": "kuài lè",
+        "translation": "happy"
+    },
+    {
+        "kanji": "累",
+        "pinyin": "lèi",
+        "translation": "tired"
+    },
+    {
+        "kanji": "离",
+        "pinyin": "lí",
+        "translation": "to leave"
+    },
+    {
+        "kanji": "两",
+        "pinyin": "liǎng",
+        "translation": "both"
+    },
+    {
+        "kanji": "路",
+        "pinyin": "lù",
+        "translation": "road"
+    },
+    {
+        "kanji": "旅游",
+        "pinyin": "lǚ yóu",
+        "translation": "trip"
+    },
+    {
+        "kanji": "卖",
+        "pinyin": "mài",
+        "translation": "to sell"
+    },
+    {
+        "kanji": "慢",
+        "pinyin": "màn",
+        "translation": "slow"
+    },
+    {
+        "kanji": "忙",
+        "pinyin": "máng",
+        "translation": "busy"
+    },
+    {
+        "kanji": "每",
+        "pinyin": "měi",
+        "translation": "each"
+    },
+    {
+        "kanji": "妹妹",
+        "pinyin": "mèi mei",
+        "translation": "younger sister"
+    },
+    {
+        "kanji": "门",
+        "pinyin": "mén",
+        "translation": "gate"
+    },
+    {
+        "kanji": "男人",
+        "pinyin": "nán rén",
+        "translation": "a man"
+    },
+    {
+        "kanji": "您",
+        "pinyin": "nín",
+        "translation": "you (courteous"
+    },
+    {
+        "kanji": "牛奶",
+        "pinyin": "niú nǎi",
+        "translation": "cow's milk"
+    },
+    {
+        "kanji": "女人",
+        "pinyin": "nǚ rén",
+        "translation": "woman"
+    },
+    {
+        "kanji": "旁边",
+        "pinyin": "páng biān",
+        "translation": "lateral"
+    },
+    {
+        "kanji": "跑步",
+        "pinyin": "pǎo bù",
+        "translation": "to walk quickly"
+    },
+    {
+        "kanji": "便宜",
+        "pinyin": "pián yi",
+        "translation": "small advantages"
+    },
+    {
+        "kanji": "票",
+        "pinyin": "piào",
+        "translation": "ticket"
+    },
+    {
+        "kanji": "妻子",
+        "pinyin": "qī zi",
+        "translation": "wife"
+    },
+    {
+        "kanji": "起床",
+        "pinyin": "qǐ chuáng",
+        "translation": "to get out of bed"
+    },
+    {
+        "kanji": "千",
+        "pinyin": "qiān",
+        "translation": "a swing"
+    },
+    {
+        "kanji": "晴",
+        "pinyin": "qíng",
+        "translation": "clear"
+    },
+    {
+        "kanji": "去年",
+        "pinyin": "qù nián",
+        "translation": "last year"
+    },
+    {
+        "kanji": "让",
+        "pinyin": "ràng",
+        "translation": "to yield"
+    },
+    {
+        "kanji": "上班",
+        "pinyin": "shàng bān",
+        "translation": "to go to work"
+    },
+    {
+        "kanji": "身体",
+        "pinyin": "shēn tǐ",
+        "translation": "(human) body"
+    },
+    {
+        "kanji": "生病",
+        "pinyin": "shēng bìng",
+        "translation": "to fall ill"
+    },
+    {
+        "kanji": "生日",
+        "pinyin": "shēng rì",
+        "translation": "birthday"
+    },
+    {
+        "kanji": "时间",
+        "pinyin": "shí jiān",
+        "translation": "time"
+    },
+    {
+        "kanji": "事情",
+        "pinyin": "shì qing",
+        "translation": "affair"
+    },
+    {
+        "kanji": "手表",
+        "pinyin": "shǒu biǎo",
+        "translation": "wrist watch"
+    },
+    {
+        "kanji": "手机",
+        "pinyin": "shǒu jī",
+        "translation": "cell phone"
+    },
+    {
+        "kanji": "送",
+        "pinyin": "sòng",
+        "translation": "to deliver"
+    },
+    {
+        "kanji": "所以",
+        "pinyin": "suǒ yǐ",
+        "translation": "therefore"
+    },
+    {
+        "kanji": "它",
+        "pinyin": "tā",
+        "translation": "it"
+    },
+    {
+        "kanji": "踢",
+        "pinyin": "tī",
+        "translation": "to kick"
+    },
+    {
+        "kanji": "题",
+        "pinyin": "tí",
+        "translation": "topic"
+    },
+    {
+        "kanji": "跳舞",
+        "pinyin": "tiào wǔ",
+        "translation": "to dance"
+    },
+    {
+        "kanji": "外",
+        "pinyin": "wài",
+        "translation": "outside"
+    },
+    {
+        "kanji": "完",
+        "pinyin": "wán",
+        "translation": "to finish"
+    },
+    {
+        "kanji": "玩",
+        "pinyin": "wán",
+        "translation": "toy"
+    },
+    {
+        "kanji": "晚上",
+        "pinyin": "wǎn shang",
+        "translation": "evening"
+    },
+    {
+        "kanji": "为",
+        "pinyin": "wèi",
+        "translation": "variant of 為|为"
+    },
+    {
+        "kanji": "问",
+        "pinyin": "wèn",
+        "translation": "to ask"
+    },
+    {
+        "kanji": "问题",
+        "pinyin": "wèn tí",
+        "translation": "question"
+    },
+    {
+        "kanji": "西瓜",
+        "pinyin": "xī guā",
+        "translation": "watermelon"
+    },
+    {
+        "kanji": "希望",
+        "pinyin": "xī wàng",
+        "translation": "to wish for"
+    },
+    {
+        "kanji": "洗",
+        "pinyin": "xǐ",
+        "translation": "to wash"
+    },
+    {
+        "kanji": "向",
+        "pinyin": "xiàng",
+        "translation": "towards"
+    },
+    {
+        "kanji": "小时",
+        "pinyin": "xiǎo shí",
+        "translation": "hour"
+    },
+    {
+        "kanji": "笑",
+        "pinyin": "xiào",
+        "translation": "laugh"
+    },
+    {
+        "kanji": "新",
+        "pinyin": "xīn",
+        "translation": "new"
+    },
+    {
+        "kanji": "姓",
+        "pinyin": "xìng",
+        "translation": "family name"
+    },
+    {
+        "kanji": "休息",
+        "pinyin": "xiū xi",
+        "translation": "rest"
+    },
+    {
+        "kanji": "雪",
+        "pinyin": "xuě",
+        "translation": "snow"
+    },
+    {
+        "kanji": "颜色",
+        "pinyin": "yán sè",
+        "translation": "color"
+    },
+    {
+        "kanji": "眼睛",
+        "pinyin": "yǎn jing",
+        "translation": "eye"
+    },
+    {
+        "kanji": "羊肉",
+        "pinyin": "yáng ròu",
+        "translation": "mutton"
+    },
+    {
+        "kanji": "药",
+        "pinyin": "yào",
+        "translation": "medicine"
+    },
+    {
+        "kanji": "要",
+        "pinyin": "yào",
+        "translation": "important"
+    },
+    {
+        "kanji": "也",
+        "pinyin": "yě",
+        "translation": "also"
+    },
+    {
+        "kanji": "已经",
+        "pinyin": "yǐ jīng",
+        "translation": "already"
+    },
+    {
+        "kanji": "一起",
+        "pinyin": "yī qǐ",
+        "translation": "in the same place"
+    },
+    {
+        "kanji": "意思",
+        "pinyin": "yì si",
+        "translation": "idea"
+    },
+    {
+        "kanji": "阴",
+        "pinyin": "yīn",
+        "translation": "overcast (weather)"
+    },
+    {
+        "kanji": "因为",
+        "pinyin": "yīn wèi",
+        "translation": "because"
+    },
+    {
+        "kanji": "游泳",
+        "pinyin": "yóu yǒng",
+        "translation": "swimming"
+    },
+    {
+        "kanji": "右边",
+        "pinyin": "yòu bian",
+        "translation": "right side"
+    },
+    {
+        "kanji": "鱼",
+        "pinyin": "yú",
+        "translation": "fish"
+    },
+    {
+        "kanji": "元",
+        "pinyin": "yuán",
+        "translation": "Chinese monetary unit"
+    },
+    {
+        "kanji": "远",
+        "pinyin": "yuǎn",
+        "translation": "far"
+    },
+    {
+        "kanji": "运动",
+        "pinyin": "yùn dòng",
+        "translation": "to move"
+    },
+    {
+        "kanji": "再",
+        "pinyin": "zài",
+        "translation": "again"
+    },
+    {
+        "kanji": "早上",
+        "pinyin": "zǎo shang",
+        "translation": "early morning"
+    },
+    {
+        "kanji": "张",
+        "pinyin": "zhāng",
+        "translation": "to open up"
+    },
+    {
+        "kanji": "长",
+        "pinyin": "zhǎng",
+        "translation": "chief"
+    },
+    {
+        "kanji": "丈夫",
+        "pinyin": "zhàng fu",
+        "translation": "husband"
+    },
+    {
+        "kanji": "找",
+        "pinyin": "zhǎo",
+        "translation": "to try to find"
+    },
+    {
+        "kanji": "着",
+        "pinyin": "zhe",
+        "translation": "aspect particle indicating action in progress"
+    },
+    {
+        "kanji": "真",
+        "pinyin": "zhēn",
+        "translation": "really"
+    },
+    {
+        "kanji": "正在",
+        "pinyin": "zhèng zài",
+        "translation": "in the process of (doing something or happening)"
+    },
+    {
+        "kanji": "知道",
+        "pinyin": "zhī dào",
+        "translation": "to know"
+    },
+    {
+        "kanji": "准备",
+        "pinyin": "zhǔn bèi",
+        "translation": "preparation"
+    },
+    {
+        "kanji": "自行车",
+        "pinyin": "zì xíng chē",
+        "translation": "bicycle"
+    },
+    {
+        "kanji": "走",
+        "pinyin": "zǒu",
+        "translation": "to walk"
+    },
+    {
+        "kanji": "最",
+        "pinyin": "zuì",
+        "translation": "most"
+    },
+    {
+        "kanji": "左边",
+        "pinyin": "zuǒ bian",
+        "translation": "left"
+    }
+]

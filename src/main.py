@@ -67,13 +67,19 @@ async def main(page: ft.Page) -> None:
             word_kpt_display.listen_button,
             example_kpt_display.listen_button
         ]
+        other_controls = [
+            button_row,
+            seg_btn
+        ]
         for btn in wifi_req_btns:
             btn: ft.IconButton
             if auth.offline_mode: break
             btn.disabled = block_actions
             btn.update()
-        button_row.disabled = block_actions
-        button_row.update()
+        for control in other_controls:
+            control: ft.Control
+            control.disabled = block_actions
+            control.update()
     
     async def play_word(_) -> None:
         nonlocal block_actions
@@ -166,10 +172,15 @@ async def main(page: ft.Page) -> None:
             
             if example_audio_bytes:
                 audio_manager.play_sfx(example_audio_bytes)
+            page.pop_dialog()
         else:
             debug_print(f"Cerebras Error: {data.error}")
+            notif = ft.SnackBar(
+                ft.Text("Cerebras Error: Please wait a bit before trying again.", color=ft.Colors.ON_ERROR),
+                duration=ft.Duration(seconds=3), behavior=ft.SnackBarBehavior.FLOATING, bgcolor=ft.Colors.ERROR
+            )
+            page.show_dialog(notif)
         
-        page.pop_dialog()
         block_actions = False
         toggle_block()
         await play_example(_)
@@ -221,6 +232,38 @@ async def main(page: ft.Page) -> None:
         text_control.value = prev_value
         text_control.update()
     
+    def on_personalization(_) -> None:        
+        async def on_save(_) -> None:
+            text = tf.value
+            text.strip().lower()
+            if not text or text.isspace():
+                tf.error = "Cannot be empty"
+                tf.update()
+            else:
+                tf.error = None
+                tf.update()
+            debug_print(f"Saving name: {text}")
+            await prefs.set("user_name", text)
+            page.pop_dialog()
+        
+        tf = ft.TextField(
+            autofocus=True, max_lines=1,
+            max_length=30, on_submit=on_save
+        )
+        dialog = ft.AlertDialog(
+            title="Enter a Name", content=tf,
+            actions=[
+                ft.Button("Save", ft.Icons.SAVE, on_click=on_save)
+            ]
+        )
+        page.show_dialog(dialog)
+    
+    def seg_btn_on_change(e: ft.Event[ft.SegmentedButton]) -> None:
+        data_list: list[str] = e.data
+        data: int = int(data_list[0])
+        debug_print(f"Setting hsk level to: {data}")
+        lesson_manager.current_hsk_level = data
+    
     # UI Components
     word_kpt_display = KPTDisplay(
         title="Welcome!", kanji="按下开始", pinyin="Àn xià kāishǐ", translation="Press to start",
@@ -229,6 +272,17 @@ async def main(page: ft.Page) -> None:
     example_kpt_display = KPTDisplay(title="Example", visible=False, on_listen=play_example)
     word_kpt_display.listen_button.disabled = auth.offline_mode
     example_kpt_display.listen_button.disabled = auth.offline_mode
+    seg_btn = ft.SegmentedButton(
+        allow_multiple_selection=False,
+        selected_icon=ft.Icons.CHECK_SHARP,
+        selected=["1"],
+        segments=[
+            ft.Segment(value="1", label="HSK 1", icon=ft.Icons.LOOKS_ONE_SHARP),
+            ft.Segment(value="2", label="HSK 2", icon=ft.Icons.LOOKS_TWO_SHARP),
+            ft.Segment(value="3", label="HSK 3", icon=ft.Icons.LOOKS_3_SHARP)
+        ],
+        on_change=seg_btn_on_change
+    )
     
     change_status("Finishing Setup... 2/2")
     word_audio_bytes: bytes = None
@@ -266,7 +320,8 @@ async def main(page: ft.Page) -> None:
             ),
             word_kpt_display,
             example_kpt_display,
-            button_row
+            button_row,
+            seg_btn
         ],
         horizontal_alignment=ft.CrossAxisAlignment.STRETCH
     )
@@ -283,7 +338,7 @@ async def main(page: ft.Page) -> None:
             ft.PopupMenuButton(
                 items=[
                     ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=on_reset),
-                    ft.PopupMenuItem("Personalization", ft.Icons.PERSON)
+                    ft.PopupMenuItem("Personalization", ft.Icons.PERSON, on_click=on_personalization)
                 ],
                 tooltip="Show additional actions",
                 icon=ft.Icons.SETTINGS

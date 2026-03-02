@@ -9,7 +9,6 @@ class TextToSpeech(edge_tts.Communicate):
         boundary: Literal['WordBoundary', 'SentenceBoundary'] = "WordBoundary",
         connect_timeout: Optional[int] = 10, receive_timeout: Optional[int] = 60
     ) -> None:
-        """A pre-defined TTS method."""
         super().__init__(
             text, voice, rate=rate, volume=volume, pitch=pitch, boundary=boundary,
             connector=None, proxy=None, connect_timeout=connect_timeout,
@@ -18,7 +17,7 @@ class TextToSpeech(edge_tts.Communicate):
         self.text = text
         
     async def get_audio_and_timing(self):
-        """Returns audio bytes that can be played in an `Audio` control."""
+        """Returns audio bytes and a list of `Subtitle` objects."""
         audio_data = bytearray()
         submaker = edge_tts.SubMaker()
         
@@ -30,15 +29,15 @@ class TextToSpeech(edge_tts.Communicate):
             elif chunk["type"] in ["WordBoundary", "SentenceBoundary"]:
                 text_to_find = chunk["text"]
             
-                # 1. Find the starting position of this word in the original text
+                # Find the starting position of this word in the original text
                 # We search starting from current_pos to avoid matching previous occurrences
                 start_idx = self.text.find(text_to_find, current_pos)
                 
                 if start_idx != -1:
-                    # 2. Identify the end of the word
+                    # Identify the end of the word
                     end_idx = start_idx + len(text_to_find)
                     
-                    # 3. Look ahead for trailing punctuation/symbols
+                    # Look ahead for trailing punctuation/symbols
                     # We stop when we hit a 'word character' (isalnum) or whitespace
                     while end_idx < len(self.text):
                         char = self.text[end_idx]
@@ -47,7 +46,7 @@ class TextToSpeech(edge_tts.Communicate):
                         else:
                             break
                     
-                    # 4. Capture everything from the previous word's end to the current word's end.
+                    # Capture everything from the previous word's end to the current word's end.
                     # This ensures leading punctuation (like brackets) is also included.
                     chunk["text"] = self.text[current_pos:end_idx]
                     current_pos = end_idx
