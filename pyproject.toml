@@ -28,6 +28,14 @@ build_number = 1
 [tool.flet.app]
 path = "src"
 
+[tool.flet.app.boot_screen]
+show = true
+message = "Booting up VaniLingo..."
+
+[tool.flet.app.startup_screen]
+show = true
+message = "Starting VaniLingo..."
+
 [tool.flet.android]
 include_assets = ["assets"]
 
