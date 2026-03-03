@@ -3,23 +3,63 @@ from edge_tts.srt_composer import Subtitle
 from typing import Literal, Optional
 from dataclasses import dataclass, field
 
+from utilities.values import clamp
+
 @dataclass
 class TTSData:
     audio: bytes = None
     cues: list[Subtitle] = field(default_factory=list)
 
+@dataclass
+class TTSConfig:
+    rate: str = "-50%"
+    volume: str = "+20%"
+    pitch: str = "+0Hz"
+    
+    def set_rate(self, rate: int = 0) -> None:
+        rate = int(clamp(rate, -100, 100))
+        self.rate = f"{rate:+}%"
+    
+    def set_volume(self, volume: int = 0) -> None:
+        volume = int(clamp(volume, -100, 100))
+        self.volume = f"{volume:+}%"
+    
+    def set_pitch(self, pitch: int = 0) -> None:
+        pitch = int(clamp(pitch, -100, 100))
+        self.pitch = f"{pitch:+}Hz"
+    
+    @property
+    def get_rate_int(self) -> int:
+        return int(self.rate.strip("%+"))
+    
+    @property
+    def get_volume_int(self) -> int:
+        return int(self.volume.strip("%+"))
+    
+    @property
+    def get_pitch_int(self) -> int:
+        return int(self.pitch.strip("Hz+"))
+    
+    # This enables **self unpacking
+    def keys(self):
+        return ("rate", "volume", "pitch")
+    
+    def __getitem__(self, key):
+        if key in self.keys():
+            return getattr(self, key)
+        raise KeyError(f"Invalid config key: {key}")
+
 class TextToSpeech(edge_tts.Communicate):
     """A simple class for producing TTS audio samples."""
     def __init__(
         self, text: str, voice: str = "zh-CN-XiaoxiaoNeural",
-        *, rate: str = "-50%", volume: str = "+20%", pitch: str = "+0Hz",
+        *, config: TTSConfig = TTSConfig(),
         boundary: Literal['WordBoundary', 'SentenceBoundary'] = "WordBoundary",
         connect_timeout: Optional[int] = 10, receive_timeout: Optional[int] = 60
     ) -> None:
         super().__init__(
-            text, voice, rate=rate, volume=volume, pitch=pitch, boundary=boundary,
-            connector=None, proxy=None, connect_timeout=connect_timeout,
-            receive_timeout=receive_timeout
+            text, voice, **config, boundary=boundary, connector=None, proxy=None,
+            connect_timeout=connect_timeout, receive_timeout=receive_timeout
         )
         self.text = text
     
