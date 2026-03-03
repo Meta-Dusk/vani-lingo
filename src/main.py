@@ -1,15 +1,17 @@
 import flet as ft
 import asyncio
 from edge_tts.srt_composer import Subtitle
+from typing import Optional
 
 from setup import setup_page, PC_PLATFORMS
 from audio.audio_manager import AudioManager
-from managers.tts import TextToSpeech, TTSData
+from managers.tts import TextToSpeech, TTSData, TTSConfig
 from managers.auth import ClientAuth
 from managers.lesson import LessonManager
 from components.buttons import ToggleThemeButton
 from components.displays import KPTDisplay
 from components.popups import LoadingNotification
+from components.inputs import SettingSlider
 from utilities.testers import is_connected
 from utilities.values import is_vani_bday
 
@@ -36,6 +38,14 @@ async def main(page: ft.Page) -> None:
     auth = ClientAuth(page, prefs)
     audio_manager = AudioManager(page, sfx_volume=1.0, music_volume=0.5, directional_sfx=False)
     block_actions: bool = False
+    config: TTSConfig = TTSConfig()
+    change_status("Loading preferences...")
+    if await prefs.contains_key("tts_rate"):
+        config.rate = await prefs.get("tts_rate")
+    if await prefs.contains_key("tts_volume"):
+        config.volume = await prefs.get("tts_volume")
+    if await prefs.contains_key("tts_pitch"):
+        config.pitch = await prefs.get("tts_pitch")
     
     change_status("Getting API key...")
     auth.get_api_key()
@@ -70,16 +80,17 @@ async def main(page: ft.Page) -> None:
             example_kpt_display.listen_button
         ]
         other_controls: list[ft.Control] = [
-            button_row,
-            seg_btn
+            button_row, seg_btn, tts_config_btn
         ]
         for btn in wifi_req_btns:
             if auth.offline_mode: break
             btn.disabled = block_actions
-            btn.update()
+            try: btn.update()
+            except RuntimeError: pass
         for control in other_controls:
             control.disabled = block_actions
-            control.update()
+            try: control.update()
+            except RuntimeError: pass
     
     async def play_word(_) -> None:
         nonlocal block_actions
@@ -117,7 +128,7 @@ async def main(page: ft.Page) -> None:
             debug_print("Can't generate TTS when in offline mode!")
             return
         try:
-            tts = TextToSpeech(text)
+            tts = TextToSpeech(text, config=config)
             word_tts_data = await tts.get_audio_and_timing()
         except Exception as e:
             debug_print(f"TTS Initialization failed: {e}")
@@ -128,7 +139,7 @@ async def main(page: ft.Page) -> None:
             debug_print("Can't generate TTS when in offline mode!")
             return
         try:
-            tts = TextToSpeech(text)
+            tts = TextToSpeech(text, config=config)
             example_tts_data = await tts.get_audio_and_timing()
         except Exception as e:
             debug_print(f"TTS Initialization failed: {e}")
@@ -195,7 +206,7 @@ async def main(page: ft.Page) -> None:
         debug_print(msg)
         page.show_dialog(ft.SnackBar(msg, ft.SnackBarBehavior.FLOATING))
     
-    def prepare_highlight_text(text_control: ft.Text, cues: list[Subtitle]):
+    def prepare_highlight_text(text_control: ft.Text, cues: list[Subtitle]) -> None:
         # Create a list of spans, one for each word/character in the cues
         text_control.spans = [
             ft.TextSpan(cue.content, style=ft.TextStyle(color=ft.Colors.PRIMARY)) 
@@ -204,7 +215,7 @@ async def main(page: ft.Page) -> None:
         text_control.value = "" # Clear the main value so only spans show
         text_control.update()
     
-    async def play_with_highlight(text_control: ft.Text, audio_bytes: bytes, cues: list[Subtitle]):
+    async def play_with_highlight(text_control: ft.Text, audio_bytes: bytes, cues: list[Subtitle]) -> None:
         prev_value = text_control.value
         prepare_highlight_text(text_control, cues)
         
@@ -267,8 +278,15 @@ async def main(page: ft.Page) -> None:
         *, update_tts_data: bool = False, play_tts: bool = False
     ) -> None:
         nonlocal settings_menu_btn, greet_btn
-        name: str = await prefs.get("user_name")
-        if not is_vani_bday() or not name.strip().lower() == "vani": return
+        name: Optional[str] = None
+        if await prefs.contains_key("user_name"):
+            name = await prefs.get("user_name")
+        if (
+            not is_vani_bday() or
+            name is None or
+            name.isspace() or
+            not name.strip().lower() == "vani"
+        ): return
         word_kpt_display.set_text(
             kanji="生日快乐, Vani!",
             pinyin="Shēngrì kuàilè, Vani!",
@@ -298,6 +316,66 @@ async def main(page: ft.Page) -> None:
         except RuntimeError: pass
         page.show_dialog(dialog)
     
+    def on_config(_) -> None:
+        def on_reset(_) -> None:
+            rate_slider.value = -50
+            volume_slider.value = 20
+            pitch_slider.value = 0
+            settings_controls.update()
+        
+        async def on_confirm(_) -> None:
+            config.set_rate(rate_slider.value)
+            config.set_volume(volume_slider.value)
+            config.set_pitch(pitch_slider.value)
+            debug_print(f"Changing TTS config to: {config}")
+            await prefs.set("tts_rate", config.rate)
+            await prefs.set("tts_volume", config.volume)
+            await prefs.set("tts_pitch", config.pitch)
+            page.pop_dialog()
+            page.show_dialog(
+                ft.SnackBar(
+                    "Confirmed changes for the Text-to-Speech Configs!",
+                    behavior=ft.SnackBarBehavior.FLOATING
+                )
+            )
+            if auth.offline_mode: return
+            if not word_kpt_display.kanji.isspace():
+                await get_word_tts(word_kpt_display.kanji)
+            if not example_kpt_display.kanji.isspace():
+                await get_example_tts(example_kpt_display.kanji)
+            if example_tts_data.audio:
+                await play_example(_)
+            elif word_tts_data.audio:
+                await play_word(_)
+        
+        rate_slider = SettingSlider(value=config.get_rate_int)
+        volume_slider = SettingSlider(value=config.get_volume_int)
+        pitch_slider = SettingSlider(value=config.get_pitch_int)
+        spacer_val: ft.Number = 70
+        
+        settings_controls = ft.Column(
+            controls=[
+                ft.Row([ft.Text("Rate", width=spacer_val), rate_slider]),
+                ft.Row([ft.Text("Volume", width=spacer_val), volume_slider]),
+                ft.Row([ft.Text("Pitch", width=spacer_val), pitch_slider])
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            alignment=ft.MainAxisAlignment.CENTER, tight=True
+        )
+        
+        config_dlg = ft.AlertDialog(
+            modal=True, title="TTS Config Settings",
+            content=settings_controls,
+            actions=[
+                ft.Button("Reset", ft.Icons.SETTINGS_BACKUP_RESTORE, on_click=on_reset),
+                ft.Button("Confirm", ft.Icons.CHECK_CIRCLE, on_click=on_confirm),
+                ft.Button("Cancel", ft.Icons.CANCEL, on_click=lambda _: page.pop_dialog())
+            ],
+            actions_alignment=ft.MainAxisAlignment.CENTER,
+            action_button_padding=4
+        )
+        page.show_dialog(config_dlg)
+    
     # UI Components
     word_kpt_display = KPTDisplay(
         title="Welcome!", kanji="按下开始", pinyin="Àn xià kāishǐ", translation="Press to start",
@@ -322,12 +400,14 @@ async def main(page: ft.Page) -> None:
         ft.Icons.NOTIFICATION_IMPORTANT, visible=False,
         on_click=open_greeting, badge=ft.Badge(small_size=10)
     )
+    tts_config_btn = ft.PopupMenuItem("TTS Config", ft.Icons.TEXTSMS, on_click=on_config)
     settings_menu_btn = ft.PopupMenuButton(
         tooltip="Show additional actions",
         icon=ft.Icons.SETTINGS,
         items=[
             ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=on_reset),
-            ft.PopupMenuItem("Personalization", ft.Icons.PERSON, on_click=on_personalization)
+            ft.PopupMenuItem("Personalization", ft.Icons.PERSON, on_click=on_personalization),
+            tts_config_btn
         ]
     )
     
