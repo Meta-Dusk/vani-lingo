@@ -2,6 +2,9 @@ import flet as ft
 from dataclasses import dataclass, field
 from typing import Optional
 
+from utilities.controls import try_update
+from managers.lesson import HSKWordDict
+
 @dataclass
 class TextDisplays:
     title: ft.Text = ft.Text()
@@ -62,8 +65,14 @@ class KPTDisplay(ft.Container):
         if title:
             self.title = title
             self.text_displays.title.value = title
-        try: self.update()
-        except RuntimeError: pass
+        try_update(self)
+    
+    def get_dict(self) -> HSKWordDict:
+        return HSKWordDict(
+            kanji=self.kanji,
+            pinyin=self.pinyin,
+            translation=self.translation
+        )
 
 @ft.control
 class StatusText(ft.Column):
@@ -80,18 +89,12 @@ class StatusText(ft.Column):
     def build(self):
         self.controls = [self.text_control, self.loader]
     
-    def try_update(self):
-        try:
-            self.update()
-            self.text_control.update()
-        except RuntimeError: pass
-    
     def set_text(self, text: str) -> None:
         self.text_control.value = text
         self.visible = True
-        self.try_update()
+        try_update(self, self.text_control)
     
     def clear_text(self) -> None:
         self.text_control.value = ""
         self.visible = False
-        self.try_update()
+        try_update(self, self.text_control)

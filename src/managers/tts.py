@@ -4,6 +4,7 @@ from typing import Literal, Optional
 from dataclasses import dataclass, field
 
 from utilities.values import clamp
+from utilities.mixins import DataclassMappingMixin
 
 @dataclass
 class TTSData:
@@ -11,7 +12,7 @@ class TTSData:
     cues: list[Subtitle] = field(default_factory=list)
 
 @dataclass
-class TTSConfig:
+class TTSConfig(DataclassMappingMixin):
     rate: str = "-50%"
     volume: str = "+20%"
     pitch: str = "+0Hz"
@@ -39,15 +40,6 @@ class TTSConfig:
     @property
     def get_pitch_int(self) -> int:
         return int(self.pitch.strip("Hz+"))
-    
-    # This enables **self unpacking
-    def keys(self):
-        return ("rate", "volume", "pitch")
-    
-    def __getitem__(self, key):
-        if key in self.keys():
-            return getattr(self, key)
-        raise KeyError(f"Invalid config key: {key}")
 
 class TextToSpeech(edge_tts.Communicate):
     """A simple class for producing TTS audio samples."""
@@ -70,7 +62,7 @@ class TextToSpeech(edge_tts.Communicate):
         """Returns audio bytes and a list of `Subtitle` objects."""
         audio_data = bytearray()
         submaker = edge_tts.SubMaker()
-        self._debug_print(f"Attempting to make TTSData for: {self.text}")
+        self._debug_print(f"Attempting to make TTSData for: \"{self.text}\"...")
         current_pos = 0
         
         async for chunk in self.stream():
@@ -103,5 +95,6 @@ class TextToSpeech(edge_tts.Communicate):
                 
                 # This records exactly when each word starts and ends
                 submaker.feed(chunk)
-                
+        
+        self._debug_print("...Finished!")
         return TTSData(bytes(audio_data), submaker.cues)
