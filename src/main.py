@@ -14,13 +14,19 @@ from components.popups import LoadingNotification
 from components.inputs import SettingSlider
 from utilities.testers import is_connected
 from utilities.values import is_vani_bday
+from utilities.controls import try_update
+from utilities.keys import keys
 
 
 # TODO: Clean up
 async def main(page: ft.Page) -> None:
     setup_page(page)
     status_txt = ft.Text("Starting Setup... 1/2")
-    page.add(ft.ProgressRing(width=100, height=100), status_txt)
+    _size = page.width * 0.3
+    page.add(
+        ft.Image("images/VaniLingo.png", width=_size, height=_size, fit=ft.BoxFit.COVER),
+        ft.Row([ft.ProgressRing(), status_txt], alignment=ft.MainAxisAlignment.CENTER, run_spacing=4)
+    )
     if page.platform in PC_PLATFORMS:
         await page.window.center()
     
@@ -31,7 +37,7 @@ async def main(page: ft.Page) -> None:
         nonlocal status_txt
         debug_print(text)
         status_txt.value = text
-        status_txt.update()
+        try_update(status_txt)
     
     change_status("Starting local services...")
     prefs = ft.SharedPreferences()
@@ -40,21 +46,21 @@ async def main(page: ft.Page) -> None:
     block_actions: bool = False
     config: TTSConfig = TTSConfig()
     change_status("Loading preferences...")
-    if await prefs.contains_key("tts_rate"):
-        config.rate = await prefs.get("tts_rate")
-    if await prefs.contains_key("tts_volume"):
-        config.volume = await prefs.get("tts_volume")
-    if await prefs.contains_key("tts_pitch"):
-        config.pitch = await prefs.get("tts_pitch")
+    if await prefs.contains_key(keys.tts.rate):
+        config.rate = await prefs.get(keys.tts.rate)
+    if await prefs.contains_key(keys.tts.volume):
+        config.volume = await prefs.get(keys.tts.volume)
+    if await prefs.contains_key(keys.tts.pitch):
+        config.pitch = await prefs.get(keys.tts.pitch)
     
     change_status("Getting API key...")
     auth.get_api_key()
     
     if auth.api_key is None:
         change_status("Checking for API key...")
-        if await prefs.contains_key("cerebras_api_key"):
+        if await prefs.contains_key(keys.api_key):
             change_status("Using saved API key...")
-            auth.api_key = await prefs.get(key="cerebras_api_key")
+            auth.api_key = await prefs.get(keys.api_key)
     
     if auth.api_key is None:
         change_status("Awaiting API key...")
@@ -74,7 +80,7 @@ async def main(page: ft.Page) -> None:
     await lesson_manager.initialize()
     
     # Callbacks
-    def toggle_block() -> None:
+    def _toggle_disabled(disabled: bool) -> None:
         wifi_req_btns: list[ft.IconButton] = [
             word_kpt_display.listen_button,
             example_kpt_display.listen_button
@@ -84,43 +90,29 @@ async def main(page: ft.Page) -> None:
         ]
         for btn in wifi_req_btns:
             if auth.offline_mode: break
-            btn.disabled = block_actions
-            try: btn.update()
-            except RuntimeError: pass
+            btn.disabled = disabled
+            try_update(btn)
         for control in other_controls:
-            control.disabled = block_actions
-            try: control.update()
-            except RuntimeError: pass
+            control.disabled = disabled
+            try_update(control)
     
     async def play_word(_) -> None:
-        nonlocal block_actions
         if word_tts_data.audio is None or len(word_tts_data.cues) == 0:
             debug_print("Nothing to play")
             return
-        block_actions = True
-        toggle_block()
-        await play_with_highlight(
+        await _play_with_highlight(
             text_control=word_kpt_display.text_displays.kanji,
-            audio_bytes=word_tts_data.audio,
-            cues=word_tts_data.cues
+            tts_data=word_tts_data
         )
-        block_actions = False
-        toggle_block()
     
     async def play_example(_) -> None:
-        nonlocal block_actions
         if example_tts_data.audio is None or len(example_tts_data.cues) == 0:
             debug_print("Nothing to play")
             return
-        block_actions = True
-        toggle_block()
-        await play_with_highlight(
+        await _play_with_highlight(
             text_control=example_kpt_display.text_displays.kanji,
-            audio_bytes=example_tts_data.audio,
-            cues=example_tts_data.cues
+            tts_data=example_tts_data
         )
-        block_actions = False
-        toggle_block()
     
     async def get_word_tts(text: str) -> None:
         nonlocal word_tts_data
@@ -144,11 +136,42 @@ async def main(page: ft.Page) -> None:
         except Exception as e:
             debug_print(f"TTS Initialization failed: {e}")
     
+    async def update_example_tts(_) -> None:
+        nonlocal example_tts_data
+        page.show_dialog(LoadingNotification(text="Generating a new example..."))
+        if auth.offline_mode: return
+        
+        _toggle_disabled(True)
+        
+        data = await lesson_manager.get_lesson_data(word_kpt_display.get_dict())
+        
+        if data.error is None:
+            example_kpt_display.visible = True
+            example_kpt_display.set_text(data.example, data.example_pinyin, data.example_en)
+            await get_example_tts(data.example.strip())
+            page.pop_dialog()
+            
+            try:
+                tts = TextToSpeech(example_kpt_display.kanji, config=config)
+                example_tts_data = await tts.get_audio_and_timing()
+                await play_example(_)
+            except Exception as e:
+                debug_print(f"TTS Initialization failed: {e}")
+            
+        else:
+            debug_print(f"Cerebras Error: {data.error}")
+            notif = ft.SnackBar(
+                ft.Text("Cerebras Error: Please wait a bit before trying again.", color=ft.Colors.ON_ERROR),
+                duration=ft.Duration(seconds=3), behavior=ft.SnackBarBehavior.FLOATING, bgcolor=ft.Colors.ERROR
+            )
+            page.show_dialog(notif)
+        
+        _toggle_disabled(False)
+    
     async def generate_word(_) -> None:
         nonlocal block_actions
         page.show_dialog(LoadingNotification(text="Retrieving a new random word..."))
-        block_actions = True
-        toggle_block()
+        _toggle_disabled(True)
         
         data = lesson_manager.get_random_word()
         word_kpt_display.set_text(**data, title="Word")
@@ -161,15 +184,13 @@ async def main(page: ft.Page) -> None:
             audio_manager.play_sfx(word_tts_data.audio)
         
         page.pop_dialog()
-        block_actions = False
-        toggle_block()
         await play_word(_)
+        _toggle_disabled(False)
     
     async def generate_lesson(_) -> None:
         nonlocal block_actions
         page.show_dialog(LoadingNotification(text="Retrieving a new random word and example..."))
-        block_actions = True
-        toggle_block()
+        _toggle_disabled(True)
         
         data = await lesson_manager.get_lesson_data()
         
@@ -192,11 +213,10 @@ async def main(page: ft.Page) -> None:
             )
             page.show_dialog(notif)
         
-        block_actions = False
-        toggle_block()
         await play_example(_)
+        _toggle_disabled(False)
     
-    async def on_reset(_) -> None:
+    async def _on_reset(_) -> None:
         page.show_dialog(LoadingNotification(text="Resetting saved preferences..."))
         if await prefs.clear():
             msg = "Successfully reset saved preferences!"
@@ -206,7 +226,7 @@ async def main(page: ft.Page) -> None:
         debug_print(msg)
         page.show_dialog(ft.SnackBar(msg, ft.SnackBarBehavior.FLOATING))
     
-    def prepare_highlight_text(text_control: ft.Text, cues: list[Subtitle]) -> None:
+    def _prepare_highlight_text(text_control: ft.Text, cues: list[Subtitle]) -> None:
         # Create a list of spans, one for each word/character in the cues
         text_control.spans = [
             ft.TextSpan(cue.content, style=ft.TextStyle(color=ft.Colors.PRIMARY)) 
@@ -215,14 +235,14 @@ async def main(page: ft.Page) -> None:
         text_control.value = "" # Clear the main value so only spans show
         text_control.update()
     
-    async def play_with_highlight(text_control: ft.Text, audio_bytes: bytes, cues: list[Subtitle]) -> None:
+    async def _play_with_highlight(text_control: ft.Text, tts_data: TTSData) -> None:
         prev_value = text_control.value
-        prepare_highlight_text(text_control, cues)
+        _prepare_highlight_text(text_control, tts_data.cues)
         
-        audio_manager.play_sfx(audio_bytes)
+        audio_manager.play_sfx(tts_data.audio)
         
         start_time = asyncio.get_event_loop().time()
-        for i, cue in enumerate(cues):
+        for i, cue in enumerate(tts_data.cues):
             # Calculate how long to wait before highlighting this word
             wait_time = (cue.start.total_seconds()) - (asyncio.get_event_loop().time() - start_time)
             if wait_time > 0: await asyncio.sleep(wait_time)
@@ -242,7 +262,7 @@ async def main(page: ft.Page) -> None:
         text_control.value = prev_value
         text_control.update()
     
-    def on_personalization(_) -> None:        
+    def _on_personalization(_) -> None:        
         async def on_save(_) -> None:
             text = tf.value.strip().lower()
             if not text or text.isspace():
@@ -251,13 +271,13 @@ async def main(page: ft.Page) -> None:
                 tf.error = None
             tf.update()
             debug_print(f"Saving name: {text}")
-            if await prefs.set("user_name", text):
+            if await prefs.set(keys.name, text):
                 msg = f"Saved \"{text}\" as the 'user_name'!"
             else:
                 msg = f"Failed to save \"{text}\" as the 'user_name'..."
             page.pop_dialog()
             page.show_dialog(ft.SnackBar(msg, ft.SnackBarBehavior.FLOATING))
-            await check_bday(update_tts_data=True, play_tts=True)
+            await _check_bday(update_tts_data=True, play_tts=True)
         
         tf = ft.TextField(
             autofocus=True, max_lines=1, max_length=30, on_submit=on_save
@@ -268,19 +288,19 @@ async def main(page: ft.Page) -> None:
         )
         page.show_dialog(dialog)
     
-    def seg_btn_on_change(e: ft.Event[ft.SegmentedButton]) -> None:
+    def _seg_btn_on_change(e: ft.Event[ft.SegmentedButton]) -> None:
         data_list: list[str] = e.data
         data: int = int(data_list[0])
         debug_print(f"Setting hsk level to: {data}")
         lesson_manager.current_hsk_level = data
     
-    async def check_bday(
+    async def _check_bday(
         *, update_tts_data: bool = False, play_tts: bool = False
     ) -> None:
         nonlocal settings_menu_btn, greet_btn
         name: Optional[str] = None
-        if await prefs.contains_key("user_name"):
-            name = await prefs.get("user_name")
+        if await prefs.contains_key(keys.name):
+            name = await prefs.get(keys.name)
         if (
             not is_vani_bday() or
             name is None or
@@ -299,7 +319,7 @@ async def main(page: ft.Page) -> None:
         if update_tts_data: await get_word_tts(word_kpt_display.kanji)
         if play_tts: await play_word(None)
     
-    def open_greeting(e: ft.Event[ft.IconButton]) -> None:
+    def _open_greeting(e: ft.Event[ft.IconButton]) -> None:
         nonlocal settings_menu_btn
         dialog = ft.AlertDialog(
             title="Happy Birthday, Vani!",
@@ -316,21 +336,21 @@ async def main(page: ft.Page) -> None:
         except RuntimeError: pass
         page.show_dialog(dialog)
     
-    def on_config(_) -> None:
-        def on_reset(_) -> None:
+    def _on_config(_) -> None:
+        def _on_reset(_) -> None:
             rate_slider.value = -50
             volume_slider.value = 20
             pitch_slider.value = 0
             settings_controls.update()
         
-        async def on_confirm(_) -> None:
+        async def _on_confirm(_) -> None:
             config.set_rate(rate_slider.value)
             config.set_volume(volume_slider.value)
             config.set_pitch(pitch_slider.value)
             debug_print(f"Changing TTS config to: {config}")
-            await prefs.set("tts_rate", config.rate)
-            await prefs.set("tts_volume", config.volume)
-            await prefs.set("tts_pitch", config.pitch)
+            await prefs.set(keys.tts.rate, config.rate)
+            await prefs.set(keys.tts.volume, config.volume)
+            await prefs.set(keys.tts.pitch, config.pitch)
             page.pop_dialog()
             page.show_dialog(
                 ft.SnackBar(
@@ -343,10 +363,8 @@ async def main(page: ft.Page) -> None:
                 await get_word_tts(word_kpt_display.kanji)
             if not example_kpt_display.kanji.isspace():
                 await get_example_tts(example_kpt_display.kanji)
-            if example_tts_data.audio:
-                await play_example(_)
-            elif word_tts_data.audio:
-                await play_word(_)
+            if example_tts_data.audio: await play_example(_)
+            elif word_tts_data.audio: await play_word(_)
         
         rate_slider = SettingSlider(value=config.get_rate_int)
         volume_slider = SettingSlider(value=config.get_volume_int)
@@ -364,12 +382,12 @@ async def main(page: ft.Page) -> None:
         )
         
         config_dlg = ft.AlertDialog(
-            modal=True, title="TTS Config Settings",
+            title="TTS Config Settings",
             content=settings_controls,
             actions=[
-                ft.Button("Reset", ft.Icons.SETTINGS_BACKUP_RESTORE, on_click=on_reset),
-                ft.Button("Confirm", ft.Icons.CHECK_CIRCLE, on_click=on_confirm),
-                ft.Button("Cancel", ft.Icons.CANCEL, on_click=lambda _: page.pop_dialog())
+                ft.Button("Reset", ft.Icons.SETTINGS_BACKUP_RESTORE, on_click=_on_reset),
+                ft.Button("Confirm", ft.Icons.CHECK_CIRCLE, on_click=_on_confirm),
+                ft.IconButton(ft.Icons.CANCEL, on_click=lambda _: page.pop_dialog(), icon_color=ft.Colors.PRIMARY)
             ],
             actions_alignment=ft.MainAxisAlignment.CENTER,
             action_button_padding=4
@@ -382,37 +400,35 @@ async def main(page: ft.Page) -> None:
         on_listen=play_word
     )
     example_kpt_display = KPTDisplay(title="Example", visible=False, on_listen=play_example)
-    word_kpt_display.listen_button.disabled = auth.offline_mode
-    example_kpt_display.listen_button.disabled = auth.offline_mode
+    word_kpt_display.listen_button.disabled = True
+    example_kpt_display.listen_button.disabled = True
     seg_btn = ft.SegmentedButton(
-        allow_multiple_selection=False,
-        selected_icon=ft.Icons.CHECK_SHARP,
-        selected=["1"],
+        allow_multiple_selection=False, selected_icon=ft.Icons.CHECK_SHARP,
+        selected=["1"], on_change=_seg_btn_on_change, disabled=True,
         segments=[
             ft.Segment(value="1", label="HSK 1", icon=ft.Icons.LOOKS_ONE_SHARP),
             ft.Segment(value="2", label="HSK 2", icon=ft.Icons.LOOKS_TWO_SHARP),
             ft.Segment(value="3", label="HSK 3", icon=ft.Icons.LOOKS_3_SHARP)
-        ],
-        on_change=seg_btn_on_change
+        ]
     )
     
     greet_btn = ft.IconButton(
         ft.Icons.NOTIFICATION_IMPORTANT, visible=False,
-        on_click=open_greeting, badge=ft.Badge(small_size=10)
+        on_click=_open_greeting, badge=ft.Badge(small_size=10)
     )
-    tts_config_btn = ft.PopupMenuItem("TTS Config", ft.Icons.TEXTSMS, on_click=on_config)
+    tts_config_btn = ft.PopupMenuItem("TTS Config", ft.Icons.TEXTSMS, on_click=_on_config, disabled=True)
     settings_menu_btn = ft.PopupMenuButton(
         tooltip="Show additional actions",
         icon=ft.Icons.SETTINGS,
         items=[
-            ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=on_reset),
-            ft.PopupMenuItem("Personalization", ft.Icons.PERSON, on_click=on_personalization),
+            ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=_on_reset),
+            ft.PopupMenuItem("Personalization", ft.Icons.PERSON, on_click=_on_personalization),
             tts_config_btn
         ]
     )
     
     change_status("Finishing Setup... 2/2")
-    await check_bday()
+    await _check_bday()
     word_tts_data = TTSData()
     example_tts_data = TTSData()
     await get_word_tts(word_kpt_display.kanji)
@@ -425,14 +441,21 @@ async def main(page: ft.Page) -> None:
                 tooltip="Retrieve a new random word. Works in offline mode."
             ),
             ft.Button(
-                content="New Example", on_click=generate_lesson, disabled=auth.offline_mode,
+                content="New Example", on_click=update_example_tts, disabled=auth.offline_mode,
+                tooltip=(
+                    "Not available in offline mode" if auth.offline_mode
+                    else "Generate a new example sentence."
+                )
+            ),
+            ft.Button(
+                content="New Pair", on_click=generate_lesson, disabled=auth.offline_mode,
                 tooltip=(
                     "Not available in offline mode" if auth.offline_mode
                     else "Generate an example sentence alongside a new random word."
                 )
-            )
+            ),
         ],
-        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+        alignment=ft.MainAxisAlignment.SPACE_BETWEEN, disabled=True
     )
     
     main_content = ft.Column(
@@ -462,5 +485,6 @@ async def main(page: ft.Page) -> None:
     )
     page.update()
     await play_word(None)
+    _toggle_disabled(False)
 
 ft.run(main)

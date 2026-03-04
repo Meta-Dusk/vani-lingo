@@ -1,11 +1,14 @@
 import flet as ft
+from typing import Optional
+
 
 @ft.control
 class ToggleThemeButton(ft.IconButton):
+    icon: Optional[ft.IconDataOrControl] = ft.Icons.DARK_MODE
+    adaptive: Optional[bool] = True
+    
     def init(self):
         self.on_click = self.on_toggle_theme
-        self.icon = ft.Icons.DARK_MODE
-        self.adaptive = True
     
     def did_mount(self):
         self.icon = (

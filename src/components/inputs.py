@@ -1,6 +1,8 @@
 import flet as ft
 from typing import Optional
 
+from utilities.controls import try_update
+
 @ft.control
 class KeyField(ft.TextField):
     autofocus: bool = True
@@ -8,20 +10,13 @@ class KeyField(ft.TextField):
     can_reveal_password: bool = True
     hint_text: Optional[str] = "Enter Cerebras Key"
     
-    def _try_update(self) -> None:
-        try: self.update
-        except RuntimeError: pass
-    
     def set_error(self, text: Optional[str]) -> None:
         self.error = text
-        self._try_update()
+        try_update(self)
     
     def reset_error(self) -> None:
         self.error = None
-        self._try_update()
-
-ft.Slider()
-
+        try_update(self)
 @ft.control
 class SettingSlider(ft.Slider):
     min: ft.Number = -100
@@ -35,7 +30,6 @@ class SettingSlider(ft.Slider):
         def _on_change(e: ft.Event[ft.Slider]) -> None:
             data: int = int(e.data)
             e.control.label = f"{data:+}"
-            try: e.control.update()
-            except RuntimeError: pass
+            try_update(e.control)
         
         self.on_change = _on_change

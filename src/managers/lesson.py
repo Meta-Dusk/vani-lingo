@@ -99,10 +99,10 @@ class LessonManager:
             case 3: return self.hsk_data.hsk_3
             case _: return self._word_error_data
     
-    async def get_lesson_data(self) -> LessonDataclass:
+    async def get_lesson_data(self, base_word: HSKWordDict = None) -> LessonDataclass:
         if not self.hsk_data or self.client is None: return self._lesson_error_data
             
-        base_word = self.get_random_word()
+        base_word = self.get_random_word() if base_word is None else base_word
         sample_word = base_word.get("kanji", None)
         if sample_word is None: return self._lesson_error_data
         self._debug_print(f"Attempting to generate example sentence for hsk{self.current_hsk_level}...")
