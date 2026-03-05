@@ -371,30 +371,25 @@ class MainApp(DebugMixin, AppSetupMixin):
             if self.auth.offline_mode: return
             await self._generate_tts_data("word")
             await self._generate_tts_data("example")
+            self.disable_ctrls = True
             if self.example_kpt_display.visible: await self._play_tts("example")
             elif self.word_kpt_display.visible: await self._play_tts("word")
+            self.disable_ctrls = False
         
         voice_dropdown = ft.DropdownM2(
-            label="Voice", hint_text="TTS Voice",
+            label="Voice", hint_text="TTS Voice", value=self.selected_voice,
             options=[ft.dropdownm2.Option(voice) for voice in AVAILABLE_VOICES],
-            value=self.selected_voice
         )
         
         settings_controls = TTSSettings(config=self.config, additional_controls=[voice_dropdown])
         
         config_dlg = ft.AlertDialog(
-            title="TTS Config Settings",
-            content=settings_controls,
+            title="TTS Config Settings", content=settings_controls,
             actions=[
                 ft.Button("Reset", ft.Icons.SETTINGS_BACKUP_RESTORE, on_click=_on_reset),
-                ft.Button("Confirm", ft.Icons.CHECK_CIRCLE, on_click=_on_confirm),
-                ft.IconButton(
-                    ft.Icons.CANCEL, icon_color=ft.Colors.PRIMARY,
-                    on_click=lambda _: self.page.pop_dialog()
-                )
+                ft.Button("Confirm", ft.Icons.CHECK_CIRCLE, on_click=_on_confirm)
             ],
-            actions_alignment=ft.MainAxisAlignment.CENTER,
-            action_button_padding=4
+            actions_alignment=ft.MainAxisAlignment.CENTER, action_button_padding=4
         )
         self.page.show_dialog(config_dlg)
     
