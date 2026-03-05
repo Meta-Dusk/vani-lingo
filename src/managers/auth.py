@@ -7,8 +7,9 @@ from cerebras.cloud.sdk import AsyncCerebras
 from components.inputs import KeyField
 from components.displays import StatusText
 from utilities.file_management import load_json_file
+from utilities.mixins import DebugMixin
 
-class ClientAuth:
+class ClientAuth(DebugMixin):
     def __init__(
         self, page: ft.Page, prefs: ft.SharedPreferences,
         *, debug: bool = False, offline_mode: bool = False
@@ -19,10 +20,6 @@ class ClientAuth:
         self.offline_mode = offline_mode
         self.api_key: Optional[str] = None
         self.client: Optional[AsyncCerebras] = None
-    
-    def _debug_print(self, msg: str) -> None:
-        if not self.debug: return
-        print(f"[ClientAuth]: {msg}")
     
     def get_client(self) -> Optional[AsyncCerebras]:
         if self.offline_mode or self.api_key is None:

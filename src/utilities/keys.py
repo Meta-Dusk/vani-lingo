@@ -5,6 +5,7 @@ class TTSKeys:
     rate = "tts_rate"
     volume = "tts_volume"
     pitch = "tts_pitch"
+    voice = "tts_voice"
 
 @dataclass
 class AvailableKeys:
