@@ -1,18 +1,20 @@
 import flet as ft
 import asyncio, inspect
 from edge_tts.srt_composer import Subtitle
-from typing import Optional, Callable
+from typing import Optional, Callable, Literal
 
-from managers.tts import TextToSpeech, TTSData
+from managers.tts import TextToSpeech, TTSData, TTSConfig
 from managers.setup import AppSetupMixin
-from components.buttons import ToggleThemeButton
+from components.buttons import ToggleThemeButton, HSKSegmentedButton, GreetNotifIcon
 from components.displays import KPTDisplay
 from components.popups import LoadingNotification
-from components.inputs import SettingSlider
+from components.inputs import SettingSlider, TTSSettings
 from utilities.values import is_vani_bday
 from utilities.controls import try_update
 from utilities.keys import keys
 from utilities.mixins import DebugMixin
+
+TtsDataTypes = Literal["word", "example"]
 
 class MainApp(DebugMixin, AppSetupMixin):
     def __init__(self, page: ft.Page):
@@ -21,6 +23,8 @@ class MainApp(DebugMixin, AppSetupMixin):
         self.initialized: bool = False
         self._disable_ctrls: bool = False
         self._on_disable_ctrls: Optional[Callable[[bool], None]] = None
+        self.word_tts_data: TTSData = None
+        self.example_tts_data: TTSData = None
     
     @property
     def disable_ctrls(self,) -> bool:
@@ -41,51 +45,36 @@ class MainApp(DebugMixin, AppSetupMixin):
         try_update(self.status_text)
     
     def _build(self) -> ft.Control:
+        async def on_word_listen(_) -> None:
+            self.disable_ctrls = True
+            await self._play_tts("word")
+            self.disable_ctrls = False
+        
+        async def on_example_listen(_) -> None:
+            self.disable_ctrls = True
+            await self._play_tts("example")
+            self.disable_ctrls = False
+        
         self.word_kpt_display = KPTDisplay(
             title="Welcome!", kanji="按下开始", pinyin="Àn xià kāishǐ", translation="Press to start",
-            on_listen=self._play_word
+            on_listen=on_word_listen
         )
-        self.example_kpt_display = KPTDisplay(
-            title="Example", visible=False,
-            on_listen=self._play_example
-        )
+        self.example_kpt_display = KPTDisplay(title="Example", visible=False, on_listen=on_example_listen)
         self.word_kpt_display.listen_button.disabled = True
         self.example_kpt_display.listen_button.disabled = True
         
-        self.seg_btn = ft.SegmentedButton(
-            allow_multiple_selection=False, selected_icon=ft.Icons.CHECK_SHARP,
-            selected=["1"],
-            on_change=self._seg_btn_on_change,
-            disabled=True,
-            segments=[
-                ft.Segment(value="1", label="HSK 1", icon=ft.Icons.LOOKS_ONE_SHARP),
-                ft.Segment(value="2", label="HSK 2", icon=ft.Icons.LOOKS_TWO_SHARP),
-                ft.Segment(value="3", label="HSK 3", icon=ft.Icons.LOOKS_3_SHARP)
-            ]
-        )
+        self.seg_btn = HSKSegmentedButton(on_change=self._seg_btn_on_change)
         
-        self.greet_btn = ft.IconButton(
-            ft.Icons.NOTIFICATION_IMPORTANT, visible=False,
-            on_click=self._open_greeting,
-            badge=ft.Badge(small_size=10)
-        )
+        self.greet_btn = GreetNotifIcon()
         self.tts_config_btn = ft.PopupMenuItem(
-            "TTS Config", ft.Icons.TEXTSMS,
-            on_click=self._on_config,
-            disabled=True
+            "TTS Config", ft.Icons.TEXTSMS, on_click=self._on_config, disabled=True
         )
         self.settings_menu_btn = ft.PopupMenuButton(
             tooltip="Show additional actions",
             icon=ft.Icons.SETTINGS,
             items=[
-                ft.PopupMenuItem(
-                    "Reset Preferences", ft.Icons.RESTORE,
-                    on_click=self._on_reset
-                ),
-                ft.PopupMenuItem(
-                    "Personalization", ft.Icons.PERSON,
-                    on_click=self._on_personalization
-                ),
+                ft.PopupMenuItem("Reset Preferences", ft.Icons.RESTORE, on_click=self._on_reset),
+                ft.PopupMenuItem("Personalization", ft.Icons.PERSON, on_click=self._on_personalization),
                 self.tts_config_btn
             ]
         )
@@ -94,13 +83,11 @@ class MainApp(DebugMixin, AppSetupMixin):
         self.button_row = ft.Row(
             controls=[
                 ft.Button(
-                    content="New Word",
-                    on_click=self.generate_word,
+                    content="New Word", on_click=self._generate_word,
                     tooltip="Retrieve a new random word. Works in offline mode."
                 ),
                 ft.Button(
-                    content="New Example",
-                    on_click=self._generate_new_example,
+                    content="New Example", on_click=self._generate_new_example,
                     disabled=self.auth.offline_mode,
                     tooltip=(
                         "Not available in offline mode" if self.auth.offline_mode
@@ -108,8 +95,7 @@ class MainApp(DebugMixin, AppSetupMixin):
                     )
                 ),
                 ft.Button(
-                    content="New Pair",
-                    on_click=self.generate_lesson,
+                    content="New Pair", on_click=self._generate_lesson,
                     disabled=self.auth.offline_mode,
                     tooltip=(
                         "Not available in offline mode"
@@ -157,79 +143,61 @@ class MainApp(DebugMixin, AppSetupMixin):
             ctrl.disabled = state
             try_update(ctrl)
     
+    def _get_tts_data(self, data_type: TtsDataTypes) -> tuple[TTSData, ft.Text]:
+        if data_type == "word":
+            return self.word_tts_data, self.word_kpt_display.text_displays.kanji
+        return self.example_tts_data, self.example_kpt_display.text_displays.kanji
+    
     # * Callbacks
-    async def _play_word(self, _) -> None:
-        data = self.word_tts_data
+    async def _play_tts(self, data_type: TtsDataTypes) -> None:
+        data, text_control = self._get_tts_data(data_type)
         if data.audio is None or len(data.cues) == 0:
             self._debug_print("Nothing to play")
             return
-        await self._play_with_highlight(
-            text_control=self.word_kpt_display.text_displays.kanji,
-            tts_data=data
-        )
+        await self._play_with_highlight(text_control, data)
     
-    async def _play_example(self, _) -> None:
-        data = self.example_tts_data
-        if data.audio is None or len(data.cues) == 0:
-            self._debug_print("Nothing to play")
-            return
-        await self._play_with_highlight(
-            text_control=self.example_kpt_display.text_displays.kanji,
-            tts_data=data
-        )
-    
-    async def _get_word_tts(self, text: str) -> None:
+    async def _generate_tts_data(self, data_type: TtsDataTypes) -> None:
         if self.auth.offline_mode:
             self._debug_print("Can't generate TTS when in offline mode!")
             return
         try:
-            tts = TextToSpeech(text, config=self.config)
-            self.word_tts_data = await tts.get_audio_and_timing()
+            if data_type == "word":
+                tts = TextToSpeech(self.word_kpt_display.kanji.strip(), config=self.config)
+                self.word_tts_data = await tts.get_audio_and_timing()
+            else:
+                tts = TextToSpeech(self.example_kpt_display.kanji.strip(), config=self.config)
+                self.example_tts_data = await tts.get_audio_and_timing()
         except Exception as e:
-            self._debug_print(f"TTS Initialization failed: {e}")
-    
-    async def _get_example_tts(self, text: str) -> None:
-        if self.auth.offline_mode:
-            self._debug_print("Can't generate TTS when in offline mode!")
-            return
-        try:
-            tts = TextToSpeech(text, config=self.config)
-            self.example_tts_data = await tts.get_audio_and_timing()
-        except Exception as e:
-            self._debug_print(f"TTS Initialization failed: {e}")
+            self._debug_print(f"TTS Initialization failed: {e}")    
     
     async def _generate_new_example(self, _) -> None:
+        if self.auth.offline_mode:
+            self._debug_print("Can't generate TTS when in offline mode!")
+            return
         self.page.show_dialog(LoadingNotification(text="Generating a new example..."))
-        if self.auth.offline_mode: return
-        
         self.disable_ctrls = True
         
         data = await self.lesson_manager.get_lesson_data(self.word_kpt_display.get_dict())
         
         if data.error is None:
             self.example_kpt_display.visible = True
-            self.example_kpt_display.set_text(data.example, data.example_pinyin, data.example_en)
-            await self._get_example_tts(data.example.strip())
+            self.example_kpt_display.set_text(**data.get_example_dict())
+            await self._generate_tts_data("example")
             self.page.pop_dialog()
-            
-            try:
-                tts = TextToSpeech(self.example_kpt_display.kanji, config=self.config)
-                self.example_tts_data = await tts.get_audio_and_timing()
-                await self._play_example(_)
-            except Exception as e:
-                self._debug_print(f"TTS Initialization failed: {e}")
+            await self._play_tts("example")
             
         else:
             self._debug_print(f"Cerebras Error: {data.error}")
             notif = ft.SnackBar(
                 ft.Text("Cerebras Error: Please wait a bit before trying again.", color=ft.Colors.ON_ERROR),
-                duration=ft.Duration(seconds=3), behavior=ft.SnackBarBehavior.FLOATING, bgcolor=ft.Colors.ERROR
+                duration=ft.Duration(seconds=5), behavior=ft.SnackBarBehavior.FLOATING, bgcolor=ft.Colors.ERROR,
+                show_close_icon=True
             )
             self.page.show_dialog(notif)
         
         self.disable_ctrls = False
     
-    async def generate_word(self, _) -> None:
+    async def _generate_word(self, _) -> None:
         self.page.show_dialog(LoadingNotification(text="Retrieving a new random word..."))
         self.disable_ctrls = True
         
@@ -237,33 +205,30 @@ class MainApp(DebugMixin, AppSetupMixin):
         self.word_kpt_display.set_text(**data, title="Word")
         self.example_kpt_display.visible = False
         self.example_kpt_display.update()
-        
-        await self._get_word_tts(data.get("kanji").strip())
-        
-        if self.word_tts_data.audio and not self.auth.offline_mode:
-            self.audio_manager.play_sfx(self.word_tts_data.audio)
-        
+        await self._generate_tts_data("word")
         self.page.pop_dialog()
-        await self._play_word(_)
+        await self._play_tts("word")
         self.disable_ctrls = False
     
-    async def generate_lesson(self, _) -> None:
+    async def _generate_lesson(self, _) -> None:
+        if self.auth.offline_mode:
+            self._debug_print("Can't generate TTS when in offline mode!")
+            return
         self.page.show_dialog(LoadingNotification(text="Retrieving a new random word and example..."))
         self.disable_ctrls = True
         
         data = await self.lesson_manager.get_lesson_data()
         
         if data.error is None and not self.auth.offline_mode:
-            self.word_kpt_display.set_text(data.kanji, data.pinyin, data.translation, title="Word")
+            self.word_kpt_display.set_text(**data.get_word_dict(), title="Word")
             self.example_kpt_display.visible = True
-            self.example_kpt_display.set_text(data.example, data.example_pinyin, data.example_en)
+            self.example_kpt_display.set_text(**data.get_example_dict())
             
-            await self._get_word_tts(data.kanji.strip())
-            await self._get_example_tts(data.example.strip())
+            await self._generate_tts_data("word")
+            await self._generate_tts_data("example")
             
-            if self.example_tts_data.audio:
-                self.audio_manager.play_sfx(self.example_tts_data.audio)
             self.page.pop_dialog()
+            await self._play_tts("example")
         else:
             self._debug_print(f"Cerebras Error: {data.error}")
             notif = ft.SnackBar(
@@ -272,7 +237,6 @@ class MainApp(DebugMixin, AppSetupMixin):
             )
             self.page.show_dialog(notif)
         
-        await self._play_example(_)
         self.disable_ctrls = False
     
     async def _on_reset(self, _) -> None:
@@ -286,18 +250,17 @@ class MainApp(DebugMixin, AppSetupMixin):
         self.page.show_dialog(ft.SnackBar(msg, ft.SnackBarBehavior.FLOATING))
     
     def _prepare_highlight_text(self, text_control: ft.Text, cues: list[Subtitle]) -> None:
-        # Create a list of spans, one for each word/character in the cues
+        """Create a list of spans, one for each word/character in the cues."""
         text_control.spans = [
             ft.TextSpan(cue.content, style=ft.TextStyle(color=ft.Colors.PRIMARY)) 
             for cue in cues
         ]
-        text_control.value = "" # Clear the main value so only spans show
+        text_control.value = ""
         text_control.update()
     
     async def _play_with_highlight(self, text_control: ft.Text, tts_data: TTSData) -> None:
         prev_value = text_control.value
         self._prepare_highlight_text(text_control, tts_data.cues)
-        
         self.audio_manager.play_sfx(tts_data.audio)
         
         start_time = asyncio.get_event_loop().time()
@@ -321,7 +284,7 @@ class MainApp(DebugMixin, AppSetupMixin):
         text_control.value = prev_value
         text_control.update()
     
-    def _on_personalization(self, _) -> None:        
+    async def _on_personalization(self, _) -> None:
         async def on_save(_) -> None:
             text = tf.value.strip().lower()
             if not text or text.isspace():
@@ -338,8 +301,12 @@ class MainApp(DebugMixin, AppSetupMixin):
             self.page.show_dialog(ft.SnackBar(msg, ft.SnackBarBehavior.FLOATING))
             await self._check_bday(update_tts_data=True, play_tts=True)
         
+        current_name = None
+        if await self.prefs.contains_key(keys.name):
+            current_name = await self.prefs.get(keys.name)
         tf = ft.TextField(
-            autofocus=True, max_lines=1, max_length=30, on_submit=on_save
+            autofocus=True, max_lines=1, max_length=30, on_submit=on_save,
+            value=current_name if current_name else ""
         )
         dialog = ft.AlertDialog(
             title="Enter a Name", content=tf,
@@ -353,7 +320,10 @@ class MainApp(DebugMixin, AppSetupMixin):
         self._debug_print(f"Setting hsk level to: {data}")
         self.lesson_manager.current_hsk_level = data
     
-    async def _check_bday(self, *, update_tts_data: bool = False, play_tts: bool = False) -> None:
+    async def _check_bday(
+        self, *, update_tts_data: bool = False,
+        play_tts: bool = False
+    ) -> None:
         name: Optional[str] = None
         if await self.prefs.contains_key(keys.name):
             name = await self.prefs.get(keys.name)
@@ -371,36 +341,21 @@ class MainApp(DebugMixin, AppSetupMixin):
         )
         self.greet_btn.visible = True
         try_update(self.greet_btn)
-        if update_tts_data: await self._get_word_tts(self.word_kpt_display.kanji)
-        if play_tts: await self._play_word(None)
-    
-    def _open_greeting(self, e: ft.Event[ft.IconButton]) -> None:
-        dialog = ft.AlertDialog(
-            title="Happy Birthday, Vani!",
-            content=ft.Image("images/bday_cake.png", fit=ft.BoxFit.CONTAIN),
-            actions=[
-                ft.Button(
-                    "Thank you", icon=ft.Icons.FACE_3_ROUNDED,
-                    on_click=lambda _: self.page.pop_dialog()
-                )
-            ]
-        )
-        e.control.badge = None
-        try: e.control.update()
-        except RuntimeError: pass
-        self.page.show_dialog(dialog)
+        if update_tts_data: await self._generate_tts_data("word")
+        if play_tts: await self._play_tts("word")
     
     def _on_config(self, _) -> None:
         def _on_reset(_) -> None:
-            rate_slider.value = -50
-            volume_slider.value = 20
-            pitch_slider.value = 0
-            settings_controls.update()
+            config = TTSConfig()
+            settings_controls.rate_slider.value = config.get_rate_int
+            settings_controls.vol_slider.value = config.get_volume_int
+            settings_controls.pitch_slider.value = config.get_pitch_int
+            try_update(settings_controls)
         
         async def _on_confirm(_) -> None:
-            self.config.set_rate(rate_slider.value)
-            self.config.set_volume(volume_slider.value)
-            self.config.set_pitch(pitch_slider.value)
+            self.config.set_rate(settings_controls.rate_slider.value)
+            self.config.set_volume(settings_controls.vol_slider.value)
+            self.config.set_pitch(settings_controls.pitch_slider.value)
             self._debug_print(f"Changing TTS config to: {self.config}")
             await self.prefs.set(keys.tts.rate, self.config.rate)
             await self.prefs.set(keys.tts.volume, self.config.volume)
@@ -414,26 +369,15 @@ class MainApp(DebugMixin, AppSetupMixin):
             )
             if self.auth.offline_mode: return
             if not self.word_kpt_display.kanji.isspace():
-                await self._get_word_tts(self.word_kpt_display.kanji)
+                await self._generate_tts_data("word")
             if not self.example_kpt_display.kanji.isspace():
-                await self._get_example_tts(self.example_kpt_display.kanji)
-            if self.example_tts_data.audio: await self._play_example(_)
-            elif self.word_tts_data.audio: await self._play_word(_)
+                await self._generate_tts_data("example")
+            if self.example_tts_data.audio and self.example_kpt_display.visible:
+                await self._play_tts("example")
+            elif self.word_tts_data.audio and self.word_kpt_display.visible:
+                await self._play_tts("word")
         
-        rate_slider = SettingSlider(value=self.config.get_rate_int)
-        volume_slider = SettingSlider(value=self.config.get_volume_int)
-        pitch_slider = SettingSlider(value=self.config.get_pitch_int)
-        spacer_val: ft.Number = 70
-        
-        settings_controls = ft.Column(
-            controls=[
-                ft.Row([ft.Text("Rate", width=spacer_val), rate_slider]),
-                ft.Row([ft.Text("Volume", width=spacer_val), volume_slider]),
-                ft.Row([ft.Text("Pitch", width=spacer_val), pitch_slider])
-            ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            alignment=ft.MainAxisAlignment.CENTER, tight=True
-        )
+        settings_controls = TTSSettings(config=self.config)
         
         config_dlg = ft.AlertDialog(
             title="TTS Config Settings",
@@ -441,7 +385,10 @@ class MainApp(DebugMixin, AppSetupMixin):
             actions=[
                 ft.Button("Reset", ft.Icons.SETTINGS_BACKUP_RESTORE, on_click=_on_reset),
                 ft.Button("Confirm", ft.Icons.CHECK_CIRCLE, on_click=_on_confirm),
-                ft.IconButton(ft.Icons.CANCEL, on_click=lambda _: self.page.pop_dialog(), icon_color=ft.Colors.PRIMARY)
+                ft.IconButton(
+                    ft.Icons.CANCEL, icon_color=ft.Colors.PRIMARY,
+                    on_click=lambda _: self.page.pop_dialog()
+                )
             ],
             actions_alignment=ft.MainAxisAlignment.CENTER,
             action_button_padding=4
@@ -450,14 +397,12 @@ class MainApp(DebugMixin, AppSetupMixin):
     
     # * Main Method
     async def run(self) -> None:
-        if not self.initialized:
-            self._debug_print("App not yet initialized!")
-            return
+        if not self.initialized: await self._start_init()
         
         self._debug_print("Starting the app...")
         built_app = self._build()
         await self._check_bday()
-        await self._get_word_tts(self.word_kpt_display.kanji)
+        await self._generate_tts_data("word")
         await asyncio.sleep(0.1)
         self.page.controls.clear()
         self.page.add(built_app)
@@ -467,6 +412,6 @@ class MainApp(DebugMixin, AppSetupMixin):
         )
         self.page.update()
         self._on_disable_ctrls = self._toggle_disabled
-        await self._play_word(None)
+        await self._play_tts("word")
         self.disable_ctrls = False
         

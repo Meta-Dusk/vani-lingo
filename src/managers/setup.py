@@ -12,7 +12,7 @@ class AppSetupMixin:
     def __init__(self):
         self.initialized: bool = False
     
-    async def start_init(self) -> None:
+    async def _start_init(self) -> None:
         await self._page_setup()
         self._initial_setup()
         await self._get_prefs()
