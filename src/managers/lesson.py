@@ -24,6 +24,20 @@ class LessonDataclass:
     example_pinyin: Optional[str] = None
     example_en: Optional[str] = None
     error: Optional[str] = None
+    
+    def get_word_dict(self) -> HSKWordDict:
+        return HSKWordDict(
+            kanji=self.kanji,
+            pinyin=self.pinyin,
+            translation=self.translation
+        )
+    
+    def get_example_dict(self) -> ExampleDataDict:
+        return HSKWordDict(
+            kanji=self.example,
+            pinyin=self.example_pinyin,
+            translation=self.example_en
+        )
 
 @dataclass
 class HSKTypes:

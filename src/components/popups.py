@@ -1,4 +1,5 @@
 import flet as ft
+from dataclasses import field
 
 @ft.control
 class LoadingNotification(ft.SnackBar):
@@ -19,3 +20,14 @@ class LoadingNotification(ft.SnackBar):
             alignment=ft.MainAxisAlignment.CENTER,
             tight=True
         )
+
+@ft.control
+class BdayDialog(ft.AlertDialog):
+    title: ft.StrOrControl = "Happy Birthday, Vani!"
+    content: ft.Control = ft.Image("images/bday_cake.png", fit=ft.BoxFit.CONTAIN)
+    actions: list[ft.Control] = field(default_factory=lambda: [
+        ft.Button(
+            "Thank you", icon=ft.Icons.FACE_3_ROUNDED,
+            on_click=lambda e: e.page.pop_dialog()
+        )
+    ])
