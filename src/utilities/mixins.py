@@ -1,14 +1,19 @@
 from collections.abc import Mapping
+from dataclasses import fields
 
 class DataclassMappingMixin(Mapping):
     """Adds dict-like unpacking and access to any dataclass."""
     
     def __getitem__(self, key):
-        return getattr(self, key)
-
+        field_names = {f.name for f in fields(self)}
+        if key in field_names:
+            return getattr(self, key)
+        raise KeyError(key)
+    
     def __iter__(self):
-        return iter(self.__dict__)
-
+        for f in fields(self):
+            yield f.name
+            
     def __len__(self):
         return len(self.__dict__)
 

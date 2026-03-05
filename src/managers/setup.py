@@ -11,6 +11,10 @@ from setup import setup_page, PC_PLATFORMS
 class AppSetupMixin:
     def __init__(self):
         self.initialized: bool = False
+        self.selected_voice: str = "Xiaoxiao"
+    
+    def _debug_print(self, msg: str) -> None:
+        raise NotImplementedError("This method is implemented in the 'DebugMixin' class")
     
     async def _start_init(self) -> None:
         await self._page_setup()
@@ -63,6 +67,8 @@ class AppSetupMixin:
             self.config.volume = await self.prefs.get(keys.tts.volume)
         if await self.prefs.contains_key(keys.tts.pitch):
             self.config.pitch = await self.prefs.get(keys.tts.pitch)
+        if await self.prefs.contains_key(keys.tts.voice):
+            self.selected_voice = await self.prefs.get(keys.tts.voice)
         self._debug_print("Loading preferences... OK")
     
     async def _setup_auth(self) -> None:

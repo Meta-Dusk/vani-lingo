@@ -4,6 +4,7 @@ from typing import Optional, TypedDict
 from dataclasses import dataclass, field
 
 from utilities.file_management import load_json_file
+from utilities.mixins import DebugMixin
 
 class HSKWordDict(TypedDict):
     kanji: str
@@ -45,7 +46,7 @@ class HSKTypes:
     hsk_2: list[HSKWordDict] = field(default_factory=list)
     hsk_3: list[HSKWordDict] = field(default_factory=list)
 
-class LessonManager:
+class LessonManager(DebugMixin):
     def __init__(self, client: Optional[AsyncCerebras]) -> None:
         self.client = client
         self.hsk_data: HSKTypes = HSKTypes()
@@ -56,9 +57,6 @@ class LessonManager:
             {"kanji": "水", "pinyin": "shuǐ", "translation": "water"}
         ]
         self.current_hsk_level: int = 1
-    
-    def _debug_print(self, msg: str) -> None:
-        print(f"[LessonManager]: {msg}")
     
     async def initialize(self, hsk_type: Optional[int] = None, load_all: bool = True):
         """Loads data and prepares the app."""

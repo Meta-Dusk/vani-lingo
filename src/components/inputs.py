@@ -43,6 +43,7 @@ class TTSSettings(ft.Column):
     horizontal_alignment: ft.CrossAxisAlignment = ft.CrossAxisAlignment.CENTER
     alignment: ft.MainAxisAlignment = ft.MainAxisAlignment.CENTER
     tight: bool = True
+    additional_controls: list[ft.Control] = field(default_factory=list)
     
     def init(self):
         self.rate_slider = SettingSlider(value=self.config.get_rate_int)
@@ -53,3 +54,5 @@ class TTSSettings(ft.Column):
             ft.Row([ft.Text("Volume", width=self.spacer_width), self.vol_slider]),
             ft.Row([ft.Text("Pitch", width=self.spacer_width),self.pitch_slider])
         ]
+        if self.additional_controls:
+            self.controls.extend(self.additional_controls)

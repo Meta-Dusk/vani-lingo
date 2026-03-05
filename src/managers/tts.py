@@ -4,7 +4,7 @@ from typing import Literal, Optional
 from dataclasses import dataclass, field
 
 from utilities.values import clamp
-from utilities.mixins import DataclassMappingMixin
+from utilities.mixins import DataclassMappingMixin, DebugMixin
 
 @dataclass
 class TTSData:
@@ -41,7 +41,7 @@ class TTSConfig(DataclassMappingMixin):
     def get_pitch_int(self) -> int:
         return int(self.pitch.strip("Hz+"))
 
-class TextToSpeech(edge_tts.Communicate):
+class TextToSpeech(edge_tts.Communicate, DebugMixin):
     """A simple class for producing TTS audio samples."""
     def __init__(
         self, text: str, voice: str = "zh-CN-XiaoxiaoNeural",
@@ -54,15 +54,13 @@ class TextToSpeech(edge_tts.Communicate):
             connect_timeout=connect_timeout, receive_timeout=receive_timeout
         )
         self.text = text
-    
-    def _debug_print(self, msg: str) -> None:
-        print(f"[TextToSpeech] {msg}")
+        self.voice = voice
     
     async def get_audio_and_timing(self) -> TTSData:
         """Returns audio bytes and a list of `Subtitle` objects."""
         audio_data = bytearray()
         submaker = edge_tts.SubMaker()
-        self._debug_print(f"Attempting to make TTSData for: \"{self.text}\"...")
+        self._debug_print(f"Attempting to make TTSData for: \"{self.text}\" with voice: {self.voice}...")
         current_pos = 0
         
         async for chunk in self.stream():

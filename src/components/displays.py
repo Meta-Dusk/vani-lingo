@@ -73,6 +73,12 @@ class KPTDisplay(ft.Container):
             pinyin=self.pinyin,
             translation=self.translation
         )
+    
+    def clear_text(self) -> None:
+        self.kanji = ""
+        self.pinyin = ""
+        self.translation = ""
+        try_update(self)
 
 @ft.control
 class StatusText(ft.Column):
