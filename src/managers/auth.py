@@ -44,14 +44,14 @@ class ClientAuth:
             self.api_key = key
             return key
         
-        self._debug_print("Getting API key... 1/3 (Checking local files)")
+        self._debug_print("Getting API key... 2/3 (Checking local files)")
         key = load_json_file("secret.json")
         if key:
             key: dict[str, str]
             self.api_key = key.get("CEREBRAS_API_KEY")
             return key
         
-        self._debug_print("Getting API key... 1/3 (Loading envs)")
+        self._debug_print("Getting API key... 3/3 (Loading envs)")
         load_dotenv()
         key = os.getenv("CEREBRAS_API_KEY")
         self.api_key = key

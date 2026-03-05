@@ -1,5 +1,4 @@
 from collections.abc import Mapping
-from dataclasses import field, fields
 
 class DataclassMappingMixin(Mapping):
     """Adds dict-like unpacking and access to any dataclass."""
@@ -12,3 +11,11 @@ class DataclassMappingMixin(Mapping):
 
     def __len__(self):
         return len(self.__dict__)
+
+class DebugMixin:
+    def _on_debug_print(self, debug_msg: str) -> None:
+        pass
+    
+    def _debug_print(self, msg: str) -> None:
+        print(f"[{self.__class__.__name__}]: {msg}")
+        self._on_debug_print(msg)
